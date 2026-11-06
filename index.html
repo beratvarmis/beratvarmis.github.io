@@ -3,59 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berat'ın Dünyası - Gamer Hub</title>
+    <title>Canlı Oyun Lobisi</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #090d16; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background-color: #111827; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 500px; width: 100%; border: 1px solid #1f2937; text-align: center; }
-        h1 { color: #3b82f6; font-size: 2rem; margin-bottom: 0.5rem; }
-        .subtitle { color: #9ca3af; margin-bottom: 2rem; font-size: 0.95rem; }
-        .section { background-color: #1f2937; padding: 1.25rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 1px solid #374151; text-align: left; }
-        .section-title { font-size: 1.1rem; color: #60a5fa; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
-        .btn { display: block; width: 100%; background-color: #374151; color: white; text-decoration: none; padding: 0.75rem; border-radius: 0.5rem; text-align: center; font-weight: 600; margin-bottom: 0.5rem; transition: 0.2s; border: none; cursor: pointer; }
-        .btn:hover { background-color: #3b82f6; transform: translateY(-2px); }
-        .btn-primary { background: linear-gradient(45deg, #3b82f6, #1d4ed8); }
-        .btn-primary:hover { background: linear-gradient(45deg, #2563eb, #1e40af); }
-        .game-area { text-align: center; padding: 10px; }
-        #coin-result { font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: #10b981; }
+        body { background-color: #0b0f19; color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: #111827; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 450px; width: 100%; border: 1px solid #1f2937; text-align: center; }
+        h1 { color: #3b82f6; font-size: 1.8rem; margin-bottom: 1.5rem; }
+        .game-box { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; border: 1px solid #374151; margin-bottom: 1.5rem; }
+        .status { font-size: 0.9rem; color: #9ca3af; margin-bottom: 1rem; }
+        .result { font-size: 2rem; font-weight: bold; margin: 1.5rem 0; color: #f59e0b; min-height: 3rem; }
+        .btn { display: block; width: 100%; background: linear-gradient(45deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 0.85rem; border-radius: 0.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 0.5rem; }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-dice { background: linear-gradient(45deg, #ec4899, #be185d); }
     </style>
+
+    <!-- Canlı Bağlantı İçin Firebase Kütüphaneleri -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
+
     <div class="container">
-        <h1>Berat Varmış</h1>
-        <p class="subtitle">Arkadaşlarımla takıldığımız resmi web sitesi paneli!</p>
-        <div class="section">
-            <div class="section-title">🔗 Hızlı Linkler</div>
-            <a href="https://steamcommunity.com" target="_blank" class="btn btn-primary">Steam Profilime Git</a>
-            <button onclick="copyDiscord()" class="btn">Discord Adımı Kopyala</button>
+        <h1>Canlı Oyun Odası 🎲</h1>
+        <div class="status" id="lobby-status">Canlı veritabanına bağlanılıyor...</div>
+        
+        <div class="game-box">
+            <div id="action-owner" style="font-size: 0.9rem; color: #10b981; height: 1.2rem;"></div>
+            <div class="result" id="game-result">⌛ Bekleniyor...</div>
+            
+            <button class="btn" onclick="playGame('coin')">🪙 Yazı-Tura At</button>
+            <button class="btn btn-dice" onclick="playGame('dice')">🎲 Zar Fırlat</button>
         </div>
-        <div class="section">
-            <div class="section-title">🎲 Oyuna Kim Başlayacak? (Yazı-Tura)</div>
-            <div class="game-area">
-                <button onclick="flipCoin()" class="btn" style="background-color: #10b981;">Parayı Fırlat!</button>
-                <div id="coin-result">...</div>
-            </div>
-        </div>
-        <div class="section">
-            <div class="section-title">📁 Faydalı Dosyalar</div>
-            <a href="https://unsplash.com" target="_blank" class="btn">4K Gamer Duvar Kağıdı İndir</a>
-        </div>
+        
+        <p style="font-size: 0.8rem; color: #6b7280;">Bu ekrandaki tüm sonuçlar odadaki herkesle anlık olarak aynıdır.</p>
     </div>
+
     <script>
-        function copyDiscord() {
-            navigator.clipboard.writeText("beratvarmis");
-            alert("Discord kullanıcı adım (beratvarmis) panonya kopyalandı!");
-        }
-        function flipCoin() {
-            const resultDiv = document.getElementById("coin-result");
-            resultDiv.innerText = "Para dönüyor...";
-            setTimeout(() => {
-                if (Math.random() < 0.5) {
-                    resultDiv.innerText = "🪙 YAZI GELDİ!";
-                } else {
-                    resultDiv.innerText = "🪙 TURA GELDİ!";
-                }
-            }, 600);
+        // ÜCRETSİZ CANLI VERİTABANI BAĞLANTISI (HERKESE AÇIK GEÇİCİ TEST VERİTABANI)
+        const firebaseConfig = {
+            databaseURL: "https://firebaseio.com"
+        };
+        
+        // Firebase Başlatılıyor
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const gameRef = database.ref('live_game');
+
+        // Kullanıcıya rastgele geçici bir Numara verelim (Kim attı görmek için)
+        const myPlayerId = "Oyuncu_" + Math.floor(Math.random() * 900 + 100);
+
+        // VERİTABANINDAN CANLI VERİ GELDİĞİNDE EKRANI GÜNCELLE (Multiplayer Kısmı)
+        gameRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('lobby-status').innerText = "🟢 Odaya Canlı Bağlısınız (" + myPlayerId + ")";
+                document.getElementById('action-owner').innerText = data.player + " hamle yaptı:";
+                document.getElementById('game-result').innerText = data.result;
+            } else {
+                document.getElementById('lobby-status').innerText = "🟢 Oda Aktif (Hamle Bekleniyor)";
+            }
+        });
+
+        // BUTONA BASILDIĞINDA VERİYİ CANLI SUNUCUYA GÖNDER
+        function playGame(type) {
+            let finalResult = "";
+            
+            if (type === 'coin') {
+                finalResult = Math.random() < 0.5 ? "🪙 YAZI GELDİ!" : "🪙 TURA GELDİ!";
+            } else if (type === 'dice') {
+                const diceRoll = Math.floor(Math.random() * 6) + 1;
+                finalResult = "🎲 ZAR: " + diceRoll + " GELDİ!";
+            }
+
+            // Veritabanına yazıyoruz. Biz yazdığımız an odadaki herkesin ekranı otomatik değişecek!
+            gameRef.set({
+                player: myPlayerId,
+                result: finalResult,
+                timestamp: Date.now()
+            });
         }
     </script>
 </body>
