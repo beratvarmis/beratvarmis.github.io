@@ -7,33 +7,20 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #08070b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        
         .container { background: #121016; padding: 2rem; border-radius: 1rem; border: 2px solid #ff3366; text-align: center; max-width: 500px; width: 100%; box-shadow: 0 0 30px rgba(255, 51, 102, 0.2); }
         h1 { font-size: 1.6rem; color: #ff3366; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; }
-        
-        /* Tepeden Bakış Oyun Alanı */
         .arena { width: 320px; height: 320px; background: #1a1721; border-radius: 50%; border: 4px solid #2d2838; margin: 0 auto 1.5rem; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        
-        /* Karakterler */
         .character { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; border: 3px solid transparent; transition: all 0.3s; }
         .character .icon { font-size: 1.5rem; }
-        
         .player-char { top: 20px; left: 130px; background: #00ffcc; color: #000; border-color: #00b38f; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); }
         .bot-char { bottom: 20px; left: 130px; background: #ff3366; color: #fff; border-color: #b3143c; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4); }
-        
-        /* Durum Belirteçleri */
         .dead { background: #3d3d3d !important; color: #8c8c8c !important; border-color: #1a1a1a !important; box-shadow: none !important; }
         .active-turn { animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-        /* Ortadaki Dönen Silah */
         .gun-center { position: absolute; top: 135px; left: 135px; width: 50px; height: 50px; background: #2d2838; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
         .gun { width: 12px; height: 45px; background: #e2e8f0; border-radius: 4px; position: absolute; bottom: 25px; transform-origin: bottom center; transition: transform 2s cubic-bezier(0.1, 0.8, 0.1, 1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .gun::after { content: ""; position: absolute; top: 0; left: 3px; width: 6px; height: 15px; background: #ff3366; border-radius: 2px; }
-
-        /* Bilgi Ekranı */
         .status-box { background: #1a1721; padding: 1rem; border-radius: 0.5rem; border: 1px solid #2d2838; font-size: 0.95rem; font-weight: bold; min-height: 55px; margin-bottom: 1.5rem; display: flex; justify-content: center; align-items: center; color: #e2e8f0; }
-        
         .btn { display: block; width: 100%; background: linear-gradient(45deg, #ff3366, #ff0044); color: white; border: none; padding: 1rem; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4); }
         .btn:disabled { background: #2d2838; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -45,24 +32,22 @@
         <h1>Russian Roulette Showdown</h1>
         
         <div class="arena">
-            <!-- Tepeden İnsan Karakterleri -->
             <div id="player-node" class="character player-char">
                 <span class="icon">🧑</span>
                 <span>SİZ</span>
             </div>
             
             <div id="bot-node" class="character bot-char">
-                <span class="icon">🤖</span>
-                <span>BOT</span>
+                <span class="icon">👤</span>
+                <span>RAKİP</span>
             </div>
             
-            <!-- Ortada Dönen Silah -->
             <div class="gun-center">
                 <div id="gun-shaft" class="gun" style="transform: rotate(0deg);"></div>
             </div>
         </div>
 
-        <div class="status-box" id="game-status">Sistem hazır. Silahı döndürmek için butona basın!</div>
+        <div class="status-box" id="game-status">Sistem hazır. Namluyu döndürmek için butona basın!</div>
         
         <button class="btn" id="action-btn" onclick="spinChamber()">🔄 ÇARKI ÇEVİR</button>
     </div>
@@ -78,7 +63,7 @@
             if (isGameOver) return;
 
             document.getElementById('action-btn').disabled = true;
-            document.getElementById('game-status').innerText = "⚡ Silah hızla dönüyor...";
+            document.getElementById('game-status').innerText = "⚡ Namlu hızla dönüyor...";
 
             const targetTurn = Math.random() < 0.5 ? "player" : "bot";
             let targetAngle = 0;
@@ -122,16 +107,16 @@
 
             } else {
                 document.getElementById('bot-node').classList.add('active-turn');
-                statusDisplay.innerText = "🤖 Sıra Botta! Yapay zeka tetiğe basıyor...";
+                statusDisplay.innerText = "👤 Sıra Rakipte! Tetik çekiliyor...";
                 
                 setTimeout(() => {
                     document.getElementById('bot-node').classList.remove('active-turn');
                     if (chamberIndex === bulletPosition) {
-                        statusDisplay.innerText = "💥 GÜM! Silah Botun elinde patladı! Kazandınız.";
+                        statusDisplay.innerText = "💥 GÜM! Silah rakibin elinde patladı! Kazandınız.";
                         document.getElementById('bot-node').classList.add('dead');
                         endSession();
                     } else {
-                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Bot hayatta kaldı.";
+                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Rakip hayatta kaldı.";
                         resetTurnButton();
                     }
                 }, 1200);
