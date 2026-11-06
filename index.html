@@ -10,36 +10,25 @@
         .container { background-color: #111827; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 500px; width: 100%; border: 1px solid #1f2937; text-align: center; }
         h1 { color: #3b82f6; font-size: 2rem; margin-bottom: 0.5rem; }
         .subtitle { color: #9ca3af; margin-bottom: 2rem; font-size: 0.95rem; }
-        
-        /* Kart Yapıları */
         .section { background-color: #1f2937; padding: 1.25rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 1px solid #374151; text-align: left; }
         .section-title { font-size: 1.1rem; color: #60a5fa; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
-        
-        /* Butonlar */
         .btn { display: block; width: 100%; background-color: #374151; color: white; text-decoration: none; padding: 0.75rem; border-radius: 0.5rem; text-align: center; font-weight: 600; margin-bottom: 0.5rem; transition: 0.2s; border: none; cursor: pointer; }
         .btn:hover { background-color: #3b82f6; transform: translateY(-2px); }
         .btn-primary { background: linear-gradient(45deg, #3b82f6, #1d4ed8); }
         .btn-primary:hover { background: linear-gradient(45deg, #2563eb, #1e40af); }
-        
-        /* Yazı Tura Oyunu */
         .game-area { text-align: center; padding: 10px; }
         #coin-result { font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: #10b981; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Berat Varmış</h1>
-        <p class="subtitle">Arkaşlarımla takıldığımız resmi web sitesi paneli!</p>
-        
-        <!-- Hızlı Erişim Alanı -->
+        <p class="subtitle">Arkadaşlarımla takıldığımız resmi web sitesi paneli!</p>
         <div class="section">
             <div class="section-title">🔗 Hızlı Linkler</div>
             <a href="https://steamcommunity.com" target="_blank" class="btn btn-primary">Steam Profilime Git</a>
             <button onclick="copyDiscord()" class="btn">Discord Adımı Kopyala</button>
         </div>
-
-        <!-- Yazı Tura Oyunu (Karar veremediklerinde kullansınlar diye) -->
         <div class="section">
             <div class="section-title">🎲 Oyuna Kim Başlayacak? (Yazı-Tura)</div>
             <div class="game-area">
@@ -47,28 +36,21 @@
                 <div id="coin-result">...</div>
             </div>
         </div>
-
-        <!-- Dosya Paylaşım Alanı -->
         <div class="section">
             <div class="section-title">📁 Faydalı Dosyalar</div>
             <a href="https://unsplash.com" target="_blank" class="btn">4K Gamer Duvar Kağıdı İndir</a>
         </div>
     </div>
-
     <script>
-        // Discord Kopyalama Fonksiyonu
         function copyDiscord() {
             navigator.clipboard.writeText("beratvarmis");
-            alert("Discord kullanıcı adım (beratvarmis) panoya kopyalandı! Discord'dan ekleyebilirsin.");
+            alert("Discord kullanıcı adım (beratvarmis) panonya kopyalandı!");
         }
-
-        // Yazı Tura Fonksiyonu
         function flipCoin() {
             const resultDiv = document.getElementById("coin-result");
             resultDiv.innerText = "Para dönüyor...";
             setTimeout(() => {
-                const sans = Math.random();
-                if (sans < 0.5) {
+                if (Math.random() < 0.5) {
                     resultDiv.innerText = "🪙 YAZI GELDİ!";
                 } else {
                     resultDiv.innerText = "🪙 TURA GELDİ!";
