@@ -39,25 +39,27 @@
         .input-box { flex: 1; background: #160f24; border: 1px solid #4c2885; border-radius: 14px; padding: 12px 16px; color: #ffffff; font-size: 0.9rem; font-weight: 600; outline: none; transition: border-color 0.2s; }
         .input-box:focus { border-color: #9061f9; box-shadow: 0 0 12px rgba(144, 97, 249, 0.3); }
         .send-btn { background: linear-gradient(135deg, #9061f9 0%, #6c2bd9 100%); color: white; border: none; width: 42px; height: 42px; border-radius: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(144, 97, 249, 0.3); }
+        .restart-btn { background: linear-gradient(135deg, #ff0055 0%, #ff5500 100%); color: white; border: none; padding: 6px 12px; border-radius: 12px; font-weight: bold; font-size: 0.75rem; cursor: pointer; display: none; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
     </style>
 </head>
 <body>
     <div class="game-wrapper">
         <div class="top-bar">
             <div class="phase-badge" id="game-phase">ROL DAĞITIMI</div>
-            <div class="timer-box">⏱️ <span id="game-timer">25</span>s</div>
+            <button class="restart-btn" id="restart-btn" onclick="resetGame()">YENİ OYUN</button>
+            <div class="timer-box" id="timer-wrapper">⏱️ <span id="game-timer">25</span>s</div>
         </div>
         <div class="table-area">
             <div class="center-table">
                 <span class="table-title">HAYATTA</span>
                 <span class="alive-count" id="alive-display">6 / 6</span>
             </div>
-            <div id="seat-1" class="seat" style="top: 12px; left: calc(50% - 32.5px);" onclick="castVote(1)"><div class="avatar-frame">🕵️‍♂️<div class="vote-badge" id="v-1">0</div></div><div class="seat-name">DeepCover</div></div>
-            <div id="seat-2" class="seat" style="top: 65px; right: 18px;" onclick="castVote(2)"><div class="avatar-frame">🥷<div class="vote-badge" id="v-2">0</div></div><div class="seat-name">Gamer_234</div></div>
-            <div id="seat-3" class="seat" style="bottom: 65px; right: 18px;" onclick="castVote(3)"><div class="avatar-frame">🧙<div class="vote-badge" id="v-3">0</div></div><div class="seat-name">DarkKnight</div></div>
-            <div id="seat-4" class="seat" style="bottom: 12px; left: calc(50% - 32.5px);" onclick="castVote(4)"><div class="avatar-frame">🧑‍🎤<div class="vote-badge" id="v-4">0</div></div><div class="seat-name">Slayer_X</div></div>
-            <div id="seat-5" class="seat" style="bottom: 65px; left: 18px;" onclick="castVote(5)"><div class="avatar-frame">🧛<div class="vote-badge" id="v-5">0</div></div><div class="seat-name">VampLord</div></div>
-            <div id="seat-6" class="seat" style="top: 65px; left: 18px;" onclick="castVote(6)"><div class="avatar-frame">🤖<div class="vote-badge" id="v-6">0</div></div><div class="seat-name">Matrix_9</div></div>
+            <div id="seat-1" class="seat" style="top: 12px; left: calc(50% - 32.5px);" onclick="castVote(1)"><div class="avatar-frame">🕵️‍♂️<div class="vote-badge" id="v-1">0</div></div><div class="seat-name" id="name-1">Yükleniyor</div></div>
+            <div id="seat-2" class="seat" style="top: 65px; right: 18px;" onclick="castVote(2)"><div class="avatar-frame">🥷<div class="vote-badge" id="v-2">0</div></div><div class="seat-name" id="name-2">Yükleniyor</div></div>
+            <div id="seat-3" class="seat" style="bottom: 65px; right: 18px;" onclick="castVote(3)"><div class="avatar-frame">🧙<div class="vote-badge" id="v-3">0</div></div><div class="seat-name" id="name-3">Yükleniyor</div></div>
+            <div id="seat-4" class="seat" style="bottom: 12px; left: calc(50% - 32.5px);" onclick="castVote(4)"><div class="avatar-frame">🧑‍🎤<div class="vote-badge" id="v-4">0</div></div><div class="seat-name" id="name-4">Yükleniyor</div></div>
+            <div id="seat-5" class="seat" style="bottom: 65px; left: 18px;" onclick="castVote(5)"><div class="avatar-frame">🧛<div class="vote-badge" id="v-5">0</div></div><div class="seat-name" id="name-5">Yükleniyor</div></div>
+            <div id="seat-6" class="seat" style="top: 65px; left: 18px;" onclick="castVote(6)"><div class="avatar-frame">🤖<div class="vote-badge" id="v-6">0</div></div><div class="seat-name" id="name-6">Yükleniyor</div></div>
         </div>
         <div class="system-announcement" id="announcement-bar">Roller atanıyor...</div>
         <div class="chat-container" id="chat-flow">
@@ -69,75 +71,167 @@
         </div>
     </div>
     <script>
-        let currentPhase=0,timeLeft=25,timerInterval,hasVoted=false,playerVotes={1:0,2:0,3:0,4:0,5:0,6:0};
-        const players={
-            1:{name:"DeepCover",role:"KÖYLÜ",alive:true,isUser:true},
-            2:{name:"Gamer_234",role:"KÖYLÜ",alive:true,isUser:false},
-            3:{name:"DarkKnight",role:"VAMPİR",alive:true,isUser:false},
-            4:{name:"Slayer_X",role:"KÖYLÜ",alive:true,isUser:false},
-            5:{name:"VampLord",role:"KÖYLÜ",alive:true,isUser:false},
-            6:{name:"Matrix_9",role:"KÖYLÜ",alive:true,isUser:false}
+        let currentPhase = 0, timeLeft = 25, timerInterval, hasVoted = false, roundCount = 1;
+        let playerVotes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        let userSeatId = 1, vampSeatId = 3;
+        
+        let players = {
+            1: { name: "", role: "KÖYLÜ", alive: true, isUser: true },
+            2: { name: "", role: "KÖYLÜ", alive: true, isUser: false },
+            3: { name: "", role: "VAMPİR", alive: true, isUser: false },
+            4: { name: "", role: "KÖYLÜ", alive: true, isUser: false },
+            5: { name: "", role: "KÖYLÜ", alive: true, isUser: false },
+            6: { name: "", role: "KÖYLÜ", alive: true, isUser: false }
         };
-        const phases=[
-            {name:"ROL DAĞITIMI",banner:"Gizli rolünüz sistem tarafından atandı!"},
-            {name:"GECE PROTOKOLÜ",banner:"Rakip vampirler kurbanını seçiyor... Köylüler uyuyor."},
-            {name:"SABAH RAPORU",banner:"Güneş doğdu. Şüphelileri tartışın!"},
-            {name:"OYLAMA SEANSI",banner:"Şüpheli birini seçmek için masadaki kartına tıklayın!"}
+
+        const botMessages = [
+            ["Bence [X] dün gece etrafta dolanıyordu.", "Alakası yok, ben masum köylüyüm. Hedef saptırılıyor.", "Oylama başlayınca okları [X] numaraya çevirelim."],
+            ["Dün gece yanımdan bir gölge geçti, bence [X] numaraydı.", "Ben tüm gece uyudum, bana iftira atılıyor!", "[X] numaranın savunması hiç güven vermedi, oyum ona."],
+            ["Herkes çok sessiz ama bence asıl şüpheli [X] numara.", "Neden bana yükleniyorsunuz? Başkalarını inceleyin!", "[X] numara panik yaptı, kesin vampir o."],
+            ["Oylamada vakit kaybetmeyelim, [X] numara net şüpheli.", "Bana oy verirseniz köylüler kaybedecek, yapmayın!", "Tartışmaya gerek yok, [X] numara net vampir."]
         ];
-        window.onload=function(){runPhase(0);};
-        function runPhase(pIdx){
-            currentPhase=pIdx;timeLeft=25;hasVoted=false;
-            document.getElementById('game-phase').innerText=phases[pIdx].name;
-            document.getElementById('announcement-bar').innerText=phases[pIdx].banner;
-            document.getElementById('game-timer').innerText=timeLeft;
-            clearTableEffects();
-            if(timerInterval)clearInterval(timerInterval);
-            timerInterval=setInterval(countdown,1000);
-            if(pIdx===0){
-                pushLog("SİSTEM","Rolünüz: KÖYLÜ. Gizliliğinizi koruyun.",true);
-                setTimeout(()=>{runPhase(1);},4000);
-            }else if(pIdx===1){simulateBotNight();}
-            else if(pIdx===2){simulateBotDiscussion();}
-            else if(pIdx===3){activateVotingUI();}
+
+        window.onload = function() { initGame(); };
+
+        function initGame() {
+            let numbers =;
+            numbers.sort(() => Math.random() - 0.5);
+            vampSeatId = Math.floor(Math.random() * 6) + 1;
+            for(let i = 1; i <= 6; i++) {
+                players[i].name = numbers[i-1] + " Numara";
+                players[i].role = (i === vampSeatId) ? "VAMPİR" : "KÖYLÜ";
+                document.getElementById(`name-${i}`).innerText = players[i].name;
+            }
+            let userRole = players[userSeatId].role;
+            document.getElementById('game-phase').innerText = "ROLÜN: " + userRole;
+            document.getElementById('game-phase').style.background = (userRole === "VAMPİR") ? "linear-gradient(135deg, #b91c1c 0%, #ff0055 100%)" : "linear-gradient(135deg, #1d4ed8 0%, #00ffcc 100%)";
+            runPhase(0);
         }
-        function countdown(){timeLeft--;document.getElementById('game-timer').innerText=timeLeft;if(timeLeft<=0){clearInterval(timerInterval);if(currentPhase===1)runPhase(2);else if(currentPhase===2)runPhase(3);else if(currentPhase===3)calculateVotes();}}
-        function pushLog(sender,text,isSys=false,isSelf=false){
-            const flow=document.getElementById('chat-flow'),bubble=document.createElement('div');
-            if(isSys){bubble.className="chat-bubble system";bubble.innerHTML=`<div class="chat-text">${text}</div>`;}
-            else{bubble.className=`chat-bubble ${isSelf?'self':''}`;bubble.innerHTML=`<div class="chat-meta">${sender}</div><div class="chat-text">${text}</div>`;}
-            flow.appendChild(bubble);flow.scrollTop=flow.scrollHeight;
+
+        function runPhase(pIdx) {
+            currentPhase = pIdx; timeLeft = 25; hasVoted = false;
+            if(pIdx === 1) {
+                document.getElementById('announcement-bar').innerText = roundCount + ". Gece: Vampirler kurban seçiyor...";
+            } else if(pIdx === 2) {
+                document.getElementById('announcement-bar').innerText = "Sabah Oldu. Şüphelileri chat alanında tartışın!";
+            } else if(pIdx === 3) {
+                document.getElementById('announcement-bar').innerText = "Oylama Seansı: Şüphelendiğiniz koltuğa tıklayın!";
+            }
+            document.getElementById('game-timer').innerText = timeLeft;
+            clearTableEffects();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(countdown, 1000);
+            if (pIdx === 0) { setTimeout(() => { runPhase(1); }, 4000); } 
+            else if (pIdx === 1) { simulateBotNight(); }
+            else if (pIdx === 2) { simulateBotDiscussion(); }
+            else if (pIdx === 3) { activateVotingUI(); }
+        }
+        function countdown() { 
+            timeLeft--; 
+            document.getElementById('game-timer').innerText = timeLeft; 
+            if (timeLeft <= 0) { 
+                clearInterval(timerInterval); 
+                if (currentPhase === 1) runPhase(2); 
+                else if (currentPhase === 2) runPhase(3); 
+                else if (currentPhase === 3) calculateVotes(); 
+            } 
+        }
+        function pushLog(sender, text, isSys = false, isSelf = false) {
+            const flow = document.getElementById('chat-flow'), bubble = document.createElement('div');
+            if (isSys) { bubble.className = "chat-bubble system"; bubble.innerHTML = `<div class="chat-text">${text}</div>`; }
+            else { bubble.className = `chat-bubble ${isSelf ? 'self' : ''}`; bubble.innerHTML = `<div class="chat-meta">${sender}</div><div class="chat-text">${text}</div>`; }
+            flow.appendChild(bubble); flow.scrollTop = flow.scrollHeight;
         }
         function sendPlayerMessage() {
             const input = document.getElementById('user-input'), msg = input.value.trim(); if (!msg) return;
-            pushLog("DeepCover", msg, false, true); input.value = "";
-            if (currentPhase === 2) { setTimeout(() => { pushLog("Gamer_234", "DeepCover çok şüpheli konuşuyor, bence oylayalım.", false); }, 1500); }
+            pushLog(players[userSeatId].name, msg, false, true); input.value = "";
+            if (currentPhase === 2) { setTimeout(() => { let botId = findAliveBot(); if(botId) pushLog(players[botId].name, "Söylediklerini değerlendireceğim.", false); }, 1500); }
         }
-        function handleKeyPress(e){if(e.key==='Enter')sendPlayerMessage();}
-        function simulateBotNight(){pushLog("SİSTEM","Gece oldu, kasaba derin bir sessizliğe büründü...", true);}
-        function simulateBotDiscussion(){
-            document.getElementById('seat-4').classList.add('eliminated');players.alive=false;updateAliveCount();
-            pushLog("SİSTEM","SABAH OLDU! Slayer_X (No 4) bu gece katledildi.",true);
-            setTimeout(()=>{pushLog("DarkKnight","Bence 5 numara dün gece etrafta dolanıyordu.",false);},3000);
-            setTimeout(()=>{pushLog("VampLord","Asıl 3 numara hedef saptırıyor, ben masumum.",false);},7000);
-            setTimeout(()=>{pushLog("Matrix_9","Oylama başlayınca okları 3 numaraya çevirelim.",false);},12000);
+        function handleKeyPress(e) { if (e.key === 'Enter') sendPlayerMessage(); }
+        function simulateBotNight() { 
+            pushLog("SİSTEM", roundCount + ". Gece protokolü devrede.", true); 
         }
-        function activateVotingUI(){for(let i=1;i<=6;i++){if(players[i].alive&&!players[i].isUser)document.getElementById(`seat-${i}`).classList.add('voting-active');}setTimeout(()=>{if(players.alive){playerVotes+=2;document.getElementById('v-3').innerText=playerVotes;document.getElementById('v-3').style.display='flex';pushLog("SİSTEM","Gamer_234 ve Matrix_9 oylarını kullandı.",true);}},4000);}
-        function castVote(tId){
-            if(currentPhase !== 3 || hasVoted || !players[tId].alive || players[tId].isUser) return;
-            hasVoted=true;playerVotes[tId]++;document.getElementById(`v-${tId}`).innerText=playerVotes[tId];document.getElementById(`v-${tId}`).style.display='flex';
-            pushLog("SİSTEM",`${players[tId].name} oyuncusuna oyunuzu verdiniz.`,true);
-            for(let i=1;i<=6;i++)document.getElementById(`seat-${i}`).classList.remove('voting-active');
+        function simulateBotDiscussion() {
+            let aliveBots = Object.keys(players).filter(id => players[id].alive && id != userSeatId);
+            if(aliveBots.length > 0) {
+                let killedId = aliveBots[Math.floor(Math.random() * aliveBots.length)];
+                if(killedId == vampSeatId) killedId = aliveBots.find(id => id != vampSeatId) || killedId;
+                players[killedId].alive = false;
+                document.getElementById(`seat-${killedId}`).classList.add('eliminated');
+                pushLog("SİSTEM", `SABAH OLDU! ${players[killedId].name} bu gece elendi.`, true);
+            }
+            updateAliveCount();
+            if(roundCount >= 5 && players[vampSeatId].alive) {
+                pushLog("SİSTEM", "💀 5 TUR BİTTİ! Vampir elenmediği için KAZANDI!", true);
+                endGame();
+                return;
+            }
+            let aliveCount = Object.values(players).filter(p => p.alive).length;
+            if(aliveCount <= 2 && players[vampSeatId].alive) {
+                pushLog("SİSTEM", "💀 Vampir çoğunluğu sağladı ve KAZANDI!", true);
+                endGame();
+                return;
+            }
+            let msgSet = botMessages[Math.floor(Math.random() * botMessages.length)];
+            let suspectName = players[vampSeatId].alive ? players[vampSeatId].name : "Herkesten şüpheleniyorum";
+            let b1 = aliveBots[0], b2 = aliveBots[1], b3 = aliveBots[2];
+            setTimeout(() => { if(b1 && players[b1].alive) pushLog(players[b1].name, msgSet[0].replace("[X]", suspectName), false); }, 3000);
+            setTimeout(() => { if(b2 && players[b2].alive) pushLog(players[b2].name, msgSet[1], false); }, 7000);
+            setTimeout(() => { if(b3 && players[b3].alive) pushLog(players[b3].name, msgSet[2].replace("[X]", suspectName), false); }, 12000);
         }
-        function calculateVotes(){
-            let maxVotes=0,elId=0;for(let i=1;i<=6;i++){if(playerVotes[i]>maxVotes){maxVotes=playerVotes[i];elId=i;}}
-            if(elId===3){
-                document.getElementById('seat-3').classList.add('eliminated');players.alive=false;
-                pushLog("SİSTEM","DarkKnight (No 3) asıldı! Rolü: VAMPİR.",true);pushLog("SİSTEM", "KÖYLÜLER KAZANDI!", true);
-                clearInterval(timerInterval);document.getElementById('game-phase').innerText="MAÇ BİTTİ";document.getElementById('announcement-bar').innerText="Zafer!";
-            }else{pushLog("SİSTEM","Oylamada eşitlik oldu. Savaş devam ediyor!",true);setTimeout(()=>{runPhase(1);},5000);}
+        function activateVotingUI() { 
+            for (let i = 1; i <= 6; i++) { 
+                if (players[i].alive && i != userSeatId) document.getElementById(`seat-${i}`).classList.add('voting-active'); 
+            } 
         }
-        function clearTableEffects(){for(let i=1;i<=6;i++){document.getElementById(`seat-${i}`).classList.remove('voting-active');if(document.getElementById(`v-${i}`)) document.getElementById(`v-${i}`).style.display='none';playerVotes[i]=0;}updateAliveCount();}
-        function updateAliveCount(){let c=0;for(let i=1;i<=6;i++){if(players[i].alive) c++;}document.getElementById('alive-display').innerText=`${c} / 6`;}
+        function castVote(tId) {
+            if (currentPhase !== 3 || hasVoted || !players[tId].alive || tId == userSeatId) return;
+            hasVoted = true; playerVotes[tId]++; 
+            document.getElementById(`v-${tId}`).innerText = playerVotes[tId]; 
+            document.getElementById(`v-${tId}`).style.display = 'flex';
+            pushLog("SİSTEM", `${players[tId].name} koltuğuna oy verdiniz.`, true);
+            for (let i = 1; i <= 6; i++) document.getElementById(`seat-${i}`).classList.remove('voting-active');
+        }
+        function calculateVotes() {
+            let aliveBots = Object.keys(players).filter(id => players[id].alive && id != userSeatId);
+            aliveBots.forEach(id => {
+                let target = (Math.random() < 0.6) ? vampSeatId : aliveBots[Math.floor(Math.random() * aliveBots.length)];
+                if(players[target] && players[target].alive) playerVotes[target]++;
+            });
+            let maxVotes = 0, elId = 0; 
+            for (let i = 1; i <= 6; i++) { if (playerVotes[i] > maxVotes) { maxVotes = playerVotes[i]; elId = i; } }
+            if (elId === vampSeatId) {
+                players[elId].alive = false; 
+                document.getElementById(`seat-${elId}`).classList.add('eliminated');
+                pushLog("SİSTEM", `🎉 ${players[elId].name} asıldı! Rolü: VAMPİR. KÖYLÜLER KAZANDI!`, true); 
+                endGame();
+            } else if (elId !== 0) {
+                players[elId].alive = false;
+                document.getElementById(`seat-${elId}`).classList.add('eliminated');
+                pushLog("SİSTEM", `🚫 ${players[elId].name} asıldı! Rolü: KÖYLÜ. Masumdu...`, true);
+                let aliveCount = Object.values(players).filter(p => p.alive).length;
+                if(aliveCount <= 2 && players[vampSeatId].alive) {
+                    pushLog("SİSTEM", "💀 Köylüler azınlığa düştü. VAMPİR KAZANDI!", true);
+                    endGame();
+                } else {
+                    roundCount++;
+                    setTimeout(() => { runPhase(1); }, 4000);
+                }
+            } else {
+                pushLog("SİSTEM", "Oylamada eşitlik oldu, kimse asılamadı.", true);
+                roundCount++;
+                setTimeout(() => { runPhase(1); }, 4000);
+            }
+        }
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-wrapper').style.display = "none";
+            document.getElementById('restart-btn').style.display = "block";
+        }
+        function resetGame() { location.reload(); }
+        function findAliveBot() { let alive = Object.keys(players).filter(id => players[id].alive && id != userSeatId); return alive[0] || null; }
+        function clearTableEffects() { for (let i = 1; i <= 6; i++) { document.getElementById(`seat-${i}`).classList.remove('voting-active'); if(document.getElementById(`v-${i}`)) document.getElementById(`v-${i}`).style.display = 'none'; playerVotes[i] = 0; } updateAliveCount(); }
+        function updateAliveCount() { let c = 0; for (let i = 1; i <= 6; i++) { if (players[i].alive) c++; } document.getElementById('alive-display').innerText = `${c} / 6`; }
     </script>
 </body>
 </html>
