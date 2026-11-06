@@ -1,6 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamer Arena - Live Roulette</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #0b0f19; color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: #111827; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 450px; width: 100%; border: 1px solid #1f2937; text-align: center; }
+        h1 { color: #f43f5e; font-size: 1.8rem; margin-bottom: 0.25rem; font-weight: 800; letter-spacing: 0.5px; }
+        .game-box { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; border: 1px solid #374151; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .status { font-size: 0.85rem; color: #9ca3af; font-weight: 500; }
+        .result { font-size: 1.6rem; font-weight: 700; margin: 1.5rem 0; color: #f59e0b; min-height: 4rem; display: flex; justify-content: center; align-items: center; line-height: 1.4; }
+        .btn { display: block; width: 100%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; padding: 1rem; border-radius: 0.5rem; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; margin-bottom: 0.5rem; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 12px -1px rgba(244, 63, 94, 0.3); }
+        .btn:active { transform: translateY(0); }
+    </style>
+
     <!-- Canlı Bağlantı İçin Firebase Kütüphaneleri -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>GAMER ARENA</h1>
+        <div class="status" id="lobby-status">Sunucuya bağlanılıyor...</div>
+        
+        <div class="game-box">
+            <div id="action-owner" style="font-size: 0.95rem; color: #10b981; height: 1.2rem; font-weight: 600;"></div>
+            <div class="result" id="game-result">⌛ Lobi Aktif. Tetik çekilmesi bekleniyor...</div>
+            
+            <button class="btn" onclick="tetikCek()">🔥 TETİĞİ ÇEK!</button>
+        </div>
+        
+        <p style="font-size: 0.8rem; color: #6b7280; font-weight: 500;">Sırayla tetiği çekin. Tur sonuçları odadaki tüm oyuncular için anlık olarak senkronizedir.</p>
+    </div>
 
     <script>
         // CANLI VERİTABANI BAĞLANTISI
@@ -12,35 +47,32 @@
         const database = firebase.database();
         const gameRef = database.ref('live_game');
 
-        // Her girişte rastgele oyuncu adı (Gamer_123 vb.)
         const myPlayerId = "Gamer_" + Math.floor(Math.random() * 900 + 100);
 
         // VERİTABANINDAN CANLI VERİ GELDİĞİNDE EKRANI GÜNCELLE
         gameRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                document.getElementById('lobby-status').innerText = "🟢 Odaya Canlı Bağlısınız (" + myPlayerId + ")";
+                document.getElementById('lobby-status').innerText = "🟢 Sunucuya Bağlısınız (" + myPlayerId + ")";
                 document.getElementById('action-owner').innerText = data.player + " tetiği çekti:";
                 document.getElementById('game-result').innerText = data.result;
             } else {
-                document.getElementById('lobby-status').innerText = "🟢 Oda Aktif (Tetiği Çekecek Birini Bekliyor)";
+                document.getElementById('lobby-status').innerText = "🟢 Sunucu Aktif (Sıra Bekleniyor)";
             }
         });
 
         // TETİK ÇEKME FONKSİYONU
-        function rollNumber() {
+        function tetikCek() {
             let finalResult = "";
-            
-            // %15 ihtimalle silah patlar, %85 ihtimalle boş çıkar
             const sans = Math.random();
             
-            if (sans < 0.15) {
+            // %20 ihtimalle patlar, %80 boş çıkar
+            if (sans < 0.20) {
                 finalResult = "💥 GÜM! ELENDİNİZ!";
             } else {
-                finalResult = "🔒 *TIK*... Silah Boş Çıktı! Sıra Diğerinde.";
+                finalResult = "🔒 *TIK*... Silah Boş Çıktı! Sıra Diğer Oyuncuda.";
             }
 
-            // Sonucu canlı veritabanına gönderiyoruz, arkadaşının ekranı da anlık değişecek
             gameRef.set({
                 player: myPlayerId,
                 result: finalResult,
@@ -48,3 +80,5 @@
             });
         }
     </script>
+</body>
+</html>
