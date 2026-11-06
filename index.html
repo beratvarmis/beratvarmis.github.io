@@ -3,175 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamer Arena - Cyber Warfare (Singleplayer)</title>
+    <title>Gamer Arena - Russian Roulette Showdown</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Consolas', 'Courier New', monospace; }
-        body { background-color: #050508; color: #00ffcc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; overflow-x: hidden; }
-        .matrix-bg { position: fixed; top:0; left:0; width:100vw; height:100vh; background: radial-gradient(circle, rgba(16,16,32,0) 0%, rgba(5,5,8,1) 80%); z-index: -1; }
-        .container { background-color: rgba(10, 11, 18, 0.95); padding: 2rem; border-radius: 4px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.15); max-width: 450px; width: 100%; border: 2px solid #00ffcc; text-align: center; position: relative; }
-        .container::before { content: "SYSTEM: SINGLE-PLAYER MODE"; position: absolute; top: -12px; left: 20px; background: #050508; padding: 0 10px; font-size: 0.8rem; color: #ff0055; border: 1px solid #ff0055; }
-        h1 { color: #ff0055; font-size: 2rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 1.5rem; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
-        .stats-panel { background: rgba(255,255,255,0.02); border: 1px solid #1f2937; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; text-align: left; }
-        .stat-label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; display: flex; justify-content: space-between; }
-        .bar-container { width: 100%; background-color: #11131e; height: 16px; border: 1px solid #374151; margin-bottom: 0.8rem; padding: 2px; }
-        .bar-fill { height: 100%; transition: width 0.3s ease; }
-        .player-hp { background: linear-gradient(90deg, #00ffcc, #0088ff); box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
-        .bot-hp { background: linear-gradient(90deg, #ff0055, #ff5500); box-shadow: 0 0 8px rgba(255, 0, 85, 0.5); }
-        .game-box { background-color: #0d0e15; padding: 1.25rem; border-radius: 4px; border: 1px solid #ff0055; margin-bottom: 1.5rem; min-height: 120px; display: flex; flex-direction: column; justify-content: center; text-align: left; }
-        .log-line { font-size: 0.9rem; margin-bottom: 6px; line-height: 1.4; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: transparent; color: #00ffcc; border: 1px solid #00ffcc; padding: 0.85rem; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.15s ease; text-transform: uppercase; letter-spacing: 1px; }
-        .btn:hover { background: rgba(0, 255, 204, 0.1); box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
-        .btn:disabled { color: #4b5563; border-color: #374151; cursor: not-allowed; box-shadow: none; background: transparent; }
-        .btn-reset { grid-column: span 2; color: #ff0055; border-color: #ff0055; display: none; }
-        .btn-reset:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #08070b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        
+        .container { background: #121016; padding: 2rem; border-radius: 1rem; border: 2px solid #ff3366; text-align: center; max-width: 500px; width: 100%; box-shadow: 0 0 30px rgba(255, 51, 102, 0.2); }
+        h1 { font-size: 1.6rem; color: #ff3366; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; }
+        
+        /* Tepeden Bakış Oyun Alanı */
+        .arena { width: 320px; height: 320px; background: #1a1721; border-radius: 50%; border: 4px solid #2d2838; margin: 0 auto 1.5rem; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        
+        /* Karakterler */
+        .character { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; border: 3px solid transparent; transition: all 0.3s; }
+        .character .icon { font-size: 1.5rem; }
+        
+        .player-char { top: 20px; left: 130px; background: #00ffcc; color: #000; border-color: #00b38f; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); }
+        .bot-char { bottom: 20px; left: 130px; background: #ff3366; color: #fff; border-color: #b3143c; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4); }
+        
+        /* Durum Belirteçleri */
+        .dead { background: #3d3d3d !important; color: #8c8c8c !important; border-color: #1a1a1a !important; box-shadow: none !important; }
+        .active-turn { animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* Ortadaki Dönen Silah */
+        .gun-center { position: absolute; top: 135px; left: 135px; width: 50px; height: 50px; background: #2d2838; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .gun { width: 12px; height: 45px; background: #e2e8f0; border-radius: 4px; position: absolute; bottom: 25px; transform-origin: bottom center; transition: transform 2s cubic-bezier(0.1, 0.8, 0.1, 1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .gun::after { content: ""; position: absolute; top: 0; left: 3px; width: 6px; height: 15px; background: #ff3366; border-radius: 2px; }
+
+        /* Bilgi Ekranı */
+        .status-box { background: #1a1721; padding: 1rem; border-radius: 0.5rem; border: 1px solid #2d2838; font-size: 0.95rem; font-weight: bold; min-height: 55px; margin-bottom: 1.5rem; display: flex; justify-content: center; align-items: center; color: #e2e8f0; }
+        
+        .btn { display: block; width: 100%; background: linear-gradient(45deg, #ff3366, #ff0044); color: white; border: none; padding: 1rem; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4); }
+        .btn:disabled { background: #2d2838; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
     </style>
 </head>
 <body>
 
-    <div class="matrix-bg"></div>
-
     <div class="container">
-        <h1>CYBER WARFARE</h1>
+        <h1>Russian Roulette Showdown</h1>
         
-        <div class="stats-panel">
-            <div class="stat-label"><span>USER HEALTH (HP)</span><span id="player-text">100 / 100</span></div>
-            <div class="bar-container">
-                <div class="bar-fill player-hp" id="player-bar" style="width: 100%;"></div>
+        <div class="arena">
+            <!-- Tepeden İnsan Karakterleri -->
+            <div id="player-node" class="character player-char">
+                <span class="icon">🧑</span>
+                <span>SİZ</span>
             </div>
             
-            <div class="stat-label"><span>BOT CPU INTEGRITY</span><span id="bot-text">100 / 100</span></div>
-            <div class="bar-container">
-                <div class="bar-fill bot-hp" id="bot-bar" style="width: 100%;"></div>
+            <div id="bot-node" class="character bot-char">
+                <span class="icon">🤖</span>
+                <span>BOT</span>
+            </div>
+            
+            <!-- Ortada Dönen Silah -->
+            <div class="gun-center">
+                <div id="gun-shaft" class="gun" style="transform: rotate(0deg);"></div>
             </div>
         </div>
 
-        <div class="game-box">
-            <div class="log-line" id="player-log" style="color: #00ffcc;">> Savaş simülasyonu başlatıldı.</div>
-            <div class="log-line" id="bot-log" style="color: #ff0055;">> Yapay zeka çevrimiçi, hamle bekliyor.</div>
-        </div>
+        <div class="status-box" id="game-status">Sistem hazır. Silahı döndürmek için butona basın!</div>
         
-        <div class="btn-grid">
-            <button class="btn game-btn" onclick="playerAction('attack')">⚔️ SALDIR</button>
-            <button class="btn game-btn" onclick="playerAction('defend')">🛡️ KALKAN</button>
-            <button class="btn game-btn" onclick="playerAction('charge')">⚡ ŞARJ ET</button>
-            <button class="btn game-btn" onclick="playerAction('hack')">☣️ SİBER HACK</button>
-            <button class="btn btn-reset" id="reset-btn" onclick="resetGame()">🔄 SİMÜLASYONU YENİDEN BAŞLAT</button>
-        </div>
+        <button class="btn" id="action-btn" onclick="spinChamber()">🔄 ÇARKI ÇEVİR</button>
     </div>
 
     <script>
-        let playerHP = 100;
-        let botHP = 100;
-        let playerShield = false;
-        let botShield = false;
+        let currentRotation = 0;
+        let isGameOver = false;
+        let chamberIndex = 0;
+        const totalChambers = 6;
+        const bulletPosition = Math.floor(Math.random() * totalChambers);
 
-        function updateUI() {
-            document.getElementById('player-bar').style.width = playerHP + "%";
-            document.getElementById('player-text').innerText = playerHP + " / 100";
-            document.getElementById('bot-bar').style.width = botHP + "%";
-            document.getElementById('bot-text').innerText = botHP + " / 100";
+        function spinChamber() {
+            if (isGameOver) return;
 
-            if (playerHP <= 0 || botHP <= 0) {
-                const btns = document.querySelectorAll('.game-btn');
-                btns.forEach(b => b.disabled = true);
-                document.getElementById('reset-btn').style.display = 'block';
+            document.getElementById('action-btn').disabled = true;
+            document.getElementById('game-status').innerText = "⚡ Silah hızla dönüyor...";
+
+            const targetTurn = Math.random() < 0.5 ? "player" : "bot";
+            let targetAngle = 0;
+
+            if (targetTurn === "player") {
+                targetAngle = 0; 
+                chamberIndex = 0;
+            } else {
+                targetAngle = 180; 
+                chamberIndex = 3;
             }
-        }
 
-        function playerAction(type) {
-            if (playerHP <= 0 || botHP <= 0) return;
+            const extraSpins = (Math.floor(Math.random() * 3) + 4) * 360; 
+            currentRotation += extraSpins + (targetAngle - (currentRotation % 360));
             
-            playerShield = false;
-            let log = "";
+            document.getElementById('gun-shaft').style.transform = `rotate(${currentRotation}deg)`;
 
-            if (type === 'attack') {
-                let damage = Math.floor(Math.random() * 16) + 10;
-                if (botShield) {
-                    damage = Math.floor(damage * 0.3);
-                    log = `> Saldırdınız! Bot kalkan kullandığı için hafif hasar aldı: -${damage} HP.`;
-                } else {
-                    log = `> Kritik veri paketleriyle saldırdınız: Bot -${damage} HP hasar aldı.`;
-                }
-                botHP = Math.max(0, botHP - damage);
-            } else if (type === 'defend') {
-                playerShield = true;
-                log = "> Güvenlik duvarını çektiniz! Bir sonraki tur gelecek hasarı engelleyeceksiniz.";
-            } else if (type === 'charge') {
-                let heal = Math.floor(Math.random() * 11) + 10;
-                playerHP = Math.min(100, playerHP + heal);
-                log = `> Hücreleri şarj ettiniz: +${heal} HP sistem sağlığı kazanıldı.`;
-            } else if (type === 'hack') {
-                if (Math.random() < 0.6) {
-                    let damage = Math.floor(Math.random() * 16) + 25;
-                    botHP = Math.max(0, botHP - damage);
-                    log = `> SİBER HACK BAŞARILI! Bot yazılımı ağır hasar aldı: -${damage} HP.`;
-                } else {
-                    log = "> SİBER HACK BAŞARISIZ! Bot güvenlik duvarına takıldınız, hamleniz boşa gitti.";
-                }
-            }
+            setTimeout(() => {
+                triggerResult(targetTurn);
+            }, 2100);
+        }
 
-            document.getElementById('player-log').innerText = log;
-            updateUI();
+        function triggerResult(turn) {
+            const statusDisplay = document.getElementById('game-status');
+            
+            if (turn === "player") {
+                document.getElementById('player-node').classList.add('active-turn');
+                statusDisplay.innerText = "🚨 Sıra sizde! Tetik çekiliyor...";
+                
+                setTimeout(() => {
+                    document.getElementById('player-node').classList.remove('active-turn');
+                    if (chamberIndex === bulletPosition) {
+                        statusDisplay.innerText = "💥 GÜM! Silah patladı, elendiniz.";
+                        document.getElementById('player-node').classList.add('dead');
+                        endSession();
+                    } else {
+                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Hayattasınız.";
+                        resetTurnButton();
+                    }
+                }, 1200);
 
-            if (botHP > 0) {
-                setTimeout(botAction, 600);
             } else {
-                document.getElementById('bot-log').innerText = "> SİSTEM MESAJI: ZAFER! Yapay zeka çekirdeği tamamen imha edildi.";
+                document.getElementById('bot-node').classList.add('active-turn');
+                statusDisplay.innerText = "🤖 Sıra Botta! Yapay zeka tetiğe basıyor...";
+                
+                setTimeout(() => {
+                    document.getElementById('bot-node').classList.remove('active-turn');
+                    if (chamberIndex === bulletPosition) {
+                        statusDisplay.innerText = "💥 GÜM! Silah Botun elinde patladı! Kazandınız.";
+                        document.getElementById('bot-node').classList.add('dead');
+                        endSession();
+                    } else {
+                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Bot hayatta kaldı.";
+                        resetTurnButton();
+                    }
+                }, 1200);
             }
         }
 
-        function botAction() {
-            botShield = false;
-            let log = "";
-            let choice = Math.random();
-
-            if (botHP < 30 && Math.random() < 0.5) {
-                let heal = Math.floor(Math.random() * 11) + 12;
-                botHP = Math.min(100, botHP + heal);
-                log = `> Bot acil tamir protokolünü çalıştırdı: +${heal} CPU kazandı.`;
-            } else if (choice < 0.4) {
-                let damage = Math.floor(Math.random() * 16) + 10;
-                if (playerShield) {
-                    damage = Math.floor(damage * 0.3);
-                    log = `> Bot karşı saldırı yaptı! Kalkanınız sayesinde hafif atlattınız: -${damage} HP.`;
-                } else {
-                    log = `> Bot ana kartınıza sızdı ve hasar vurdu: -${damage} HP.`;
-                }
-                playerHP = Math.max(0, playerHP - damage);
-            } else if (choice < 0.7) {
-                botShield = true;
-                log = "> Bot şifreli kalkan modunu aktif etti.";
-            } else {
-                let damage = Math.floor(Math.random() * 11) + 20;
-                if (playerShield) {
-                    damage = Math.floor(damage * 0.3);
-                    log = `> Bot yüksek frekanslı lazer denedi! Kalkanınız hasarı emdi: -${damage} HP.`;
-                } else {
-                    log = `> Bot yüksek frekanslı lazer ateşledi: -${damage} HP ağır hasar aldınız!`;
-                }
-                playerHP = Math.max(0, playerHP - damage);
-            }
-
-            document.getElementById('bot-log').innerText = log;
-            updateUI();
-
-            if (playerHP <= 0) {
-                document.getElementById('player-log').innerText = "> SİSTEM MESAJI: BAĞLANTI KOPARILDI. Bot sizi alt etti.";
-            }
+        function resetTurnButton() {
+            document.getElementById('action-btn').disabled = false;
+            document.getElementById('action-btn').innerText = "🔄 YENİDEN ÇEVİR";
         }
 
-        function resetGame() {
-            playerHP = 100;
-            botHP = 100;
-            playerShield = false;
-            botShield = false;
-            document.getElementById('player-log').innerText = "> Savaş simülasyonu yeniden başlatıldı.";
-            document.getElementById('bot-log').innerText = "> Yapay zeka çevrimiçi, hamle bekliyor.";
-            document.getElementById('reset-btn').style.display = 'none';
-            const btns = document.querySelectorAll('.game-btn');
-            btns.forEach(b => b.disabled = false);
-            updateUI();
+        function endSession() {
+            isGameOver = true;
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.disabled = false;
+            actionBtn.innerText = "🔄 YENİDEN BAŞLAT";
+            actionBtn.onclick = () => { location.reload(); };
         }
     </script>
 </body>
