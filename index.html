@@ -3,138 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamer Arena - Russian Roulette Showdown</title>
+    <title>Gamer Arena - Vampir Köylü (WePlay Style)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #08070b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .container { background: #121016; padding: 2rem; border-radius: 1rem; border: 2px solid #ff3366; text-align: center; max-width: 500px; width: 100%; box-shadow: 0 0 30px rgba(255, 51, 102, 0.2); }
-        h1 { font-size: 1.6rem; color: #ff3366; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; }
-        .arena { width: 320px; height: 320px; background: #1a1721; border-radius: 50%; border: 4px solid #2d2838; margin: 0 auto 1.5rem; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        .character { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; border: 3px solid transparent; transition: all 0.3s; }
-        .character .icon { font-size: 1.5rem; }
-        .player-char { top: 20px; left: 130px; background: #00ffcc; color: #000; border-color: #00b38f; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); }
-        .bot-char { bottom: 20px; left: 130px; background: #ff3366; color: #fff; border-color: #b3143c; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4); }
-        .dead { background: #3d3d3d !important; color: #8c8c8c !important; border-color: #1a1a1a !important; box-shadow: none !important; }
-        .active-turn { animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-        .gun-center { position: absolute; top: 135px; left: 135px; width: 50px; height: 50px; background: #2d2838; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-        .gun { width: 12px; height: 45px; background: #e2e8f0; border-radius: 4px; position: absolute; bottom: 25px; transform-origin: bottom center; transition: transform 2s cubic-bezier(0.1, 0.8, 0.1, 1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .gun::after { content: ""; position: absolute; top: 0; left: 3px; width: 6px; height: 15px; background: #ff3366; border-radius: 2px; }
-        .status-box { background: #1a1721; padding: 1rem; border-radius: 0.5rem; border: 1px solid #2d2838; font-size: 0.95rem; font-weight: bold; min-height: 55px; margin-bottom: 1.5rem; display: flex; justify-content: center; align-items: center; color: #e2e8f0; }
-        .btn { display: block; width: 100%; background: linear-gradient(45deg, #ff3366, #ff0044); color: white; border: none; padding: 1rem; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4); }
-        .btn:disabled { background: #2d2838; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #0c0813; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; overflow: hidden; }
+        
+        .game-wrapper { width: 100%; max-width: 480px; height: 92vh; background: linear-gradient(180deg, #1f1435 0%, #110a1c 100%); border-radius: 24px; border: 2px solid #7c3aed; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 40px rgba(124, 58, 237, 0.3); position: relative; }
+        
+        /* Üst Bilgi Paneli */
+        .top-bar { background: rgba(0, 0, 0, 0.4); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(124, 58, 237, 0.2); z-index: 10; }
+        .phase-badge { background: linear-gradient(90deg, #ff0055, #7c3aed); padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); text-transform: uppercase; }
+        .timer-box { font-size: 1.1rem; font-weight: 800; color: #00ffcc; display: flex; align-items: center; gap: 6px; text-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
+        
+        /* WePlay Temalı İnteraktif Yuvarlak Masa Düzeni */
+        .table-area { flex: 1; min-height: 280px; max-height: 340px; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, rgba(0,0,0,0) 70%); }
+        .center-table { width: 140px; height: 140px; background: radial-gradient(circle, #3b1d5a 0%, #1e0b30 100%); border-radius: 50%; border: 6px solid #7c3aed; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(124, 58, 237, 0.5), inset 0 0 20px rgba(0,0,0,0.6); z-index: 2; position: relative; }
+        .center-table::after { content: ""; position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px dashed rgba(0, 255, 204, 0.4); animation: rotate-dash 20s linear infinite; }
+        @keyframes rotate-dash { to { transform: rotate(360deg); } }
+        .table-title { font-size: 0.75rem; color: #a78bfa; font-weight: 700; letter-spacing: 1px; }
+        .alive-count { font-size: 1.2rem; font-weight: 900; color: #ffffff; margin-top: 2px; }
+        
+        /* Oyuncu Kartları ve Sandalyeler */
+        .seat { position: absolute; width: 65px; height: 75px; display: flex; flex-direction: column; align-items: center; z-index: 5; transition: all 0.3s ease; cursor: pointer; }
+        .avatar-frame { width: 48px; height: 48px; border-radius: 50%; background: #2e1c4e; border: 3px solid #a78bfa; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.2s; }
+        .seat:hover .avatar-frame { transform: scale(1.1); }
+        .seat-name { font-size: 0.7rem; font-weight: 700; color: #e2e8f0; margin-top: 4px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 10px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
+        .role-tag { position: absolute; bottom: -4px; background: #10b981; color: white; font-size: 0.55rem; padding: 1px 5px; border-radius: 6px; font-weight: 800; text-transform: uppercase; border: 1px solid #047857; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none; }
+        .vote-badge { position: absolute; top: -8px; right: -4px; background: #ff0055; color: white; font-size: 0.65rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 1.5px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+        
+        /* Durum Değişiklikleri */
+        .seat.eliminated .avatar-frame { background: #1a1523 !important; border-color: #4b5563 !important; filter: grayscale(1); }
+        .seat.eliminated .avatar-frame::after { content: "❌"; position: absolute; font-size: 1.2rem; }
+        .seat.eliminated .seat-name { color: #6b7280; }
+        .seat.voting-active .avatar-frame { border-color: #ff0055; animation: pulse-border 1.5s infinite alternate; }
+        @keyframes pulse-border { from { box-shadow: 0 0 4px #ff0055; } to { box-shadow: 0 0 14px #ff0055; } }
+        
+        /* Akış Bilgi ve Log Kutusu */
+        .system-announcement { background: rgba(124, 58, 237, 0.15); border-top: 1px solid rgba(124, 58, 237, 0.3); border-bottom: 1px solid rgba(124, 58, 237, 0.3); padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #c084fc; text-align: center; letter-spacing: 0.5px; }
+        
+        /* WePlay Tarzı Canlı Metin Chat Alanı */
+        .chat-container { flex: 2; display: flex; flex-direction: column; background: rgba(0,0,0,0.25); padding: 12px; overflow-y: auto; gap: 8px; border-bottom: 1px solid rgba(124, 58, 237, 0.15); }
+        .chat-bubble { display: flex; flex-direction: column; max-width: 85%; animation: fadeIn 0.25s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-meta { font-size: 0.65rem; font-weight: 700; color: #a78bfa; margin-left: 4px; margin-bottom: 2px; text-transform: uppercase; }
+        .chat-text { background: #25183a; color: #f1f5f9; padding: 8px 12px; border-radius: 4px 14px 14px 14px; font-size: 0.85rem; line-height: 1.4; border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .chat-bubble.self { align-self: flex-end; }
+        .chat-bubble.self .chat-meta { align-self: flex-end; color: #00ffcc; margin-right: 4px; }
+        .chat-bubble.self .chat-text { background: #1e3a47; border-radius: 14px 4px 14px 14px; border-color: rgba(0, 255, 204, 0.2); }
+        .chat-bubble.system { align-self: center; max-width: 100%; }
+        .chat-bubble.system .chat-text { background: transparent; border: none; color: #9ca3af; font-size: 0.75rem; font-style: italic; padding: 2px; box-shadow: none; text-align: center; }
+        
+        /* Alt Kontrol ve Giriş Paneli */
+        .control-panel { padding: 12px 16px; background: rgba(15, 10, 25, 0.9); display: flex; gap: 10px; align-items: center; }
+        .input-box { flex: 1; background: #1b1329; border: 1px solid #4c2885; border-radius: 12px; padding: 12px 14px; color: #ffffff; font-size: 0.9rem; font-weight: 600; outline: none; transition: border-color 0.2s; }
+        .input-box:focus { border-color: #7c3aed; box-shadow: 0 0 10px rgba(124, 58, 237, 0.2); }
+        .send-btn { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; border: none; width: 44px; height: 44px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: transform 0.1s, filter 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3); }
+        .send-btn:hover { filter: brightness(1.1); }
+        .send-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Russian Roulette Showdown</h1>
-        
-        <div class="arena">
-            <div id="player-node" class="character player-char">
-                <span class="icon">🧑</span>
-                <span>SİZ</span>
+    <div class="matrix-bg"></div>
+
+    <div class="game-wrapper">
+        <!-- Üst Bilgi Paneli -->
+        <div class="top-bar">
+            <div class="phase-badge" id="game-phase">ROL DAĞITIMI</div>
+            <div class="timer-box">⏱️ <span id="game-timer">25</span>s</div>
+        </div>
+
+        <!-- Yuvarlak Masa Düzeni -->
+        <div class="table-area">
+            <div class="center-table">
+                <span class="table-title">HAYATTA</span>
+                <span class="alive-count" id="alive-display">6 / 6</span>
             </div>
-            
-            <div id="bot-node" class="character bot-char">
-                <span class="icon">👤</span>
-                <span>RAKİP</span>
+
+            <!-- 6 Kişilik Masa Pozisyonları -->
+            <!-- Pozisyonlar daire etrafına trigonometrik oranlarla yerleştirilmiştir -->
+            <div id="seat-1" class="seat" style="top: 15px; left: calc(50% - 32.5px);" onclick="castVote(1)">
+                <div class="avatar-frame">🧑‍🚀<div class="vote-badge" id="v-1">0</div><div class="role-tag" id="r-1"></div></div>
+                <div class="seat-name">SİZ (No 1)</div>
             </div>
-            
-            <div class="gun-center">
-                <div id="gun-shaft" class="gun" style="transform: rotate(0deg);"></div>
+            <div id="seat-2" class="seat" style="top: 75px; right: 25px;" onclick="castVote(2)">
+                <div class="avatar-frame">🥷<div class="vote-badge" id="v-2">0</div><div class="role-tag" id="r-2"></div></div>
+                <div class="seat-name">Gamer_234</div>
+            </div>
+            <div id="seat-3" class="seat" style="bottom: 75px; right: 25px;" onclick="castVote(3)">
+                <div class="avatar-frame">🧙<div class="vote-badge" id="v-3">0</div><div class="role-tag" id="r-3"></div></div>
+                <div class="seat-name">DarkKnight</div>
+            </div>
+            <div id="seat-4" class="seat" style="bottom: 15px; left: calc(50% - 32.5px);" onclick="castVote(4)">
+                <div class="avatar-frame">🧑‍🎤<div class="vote-badge" id="v-4">0</div><div class="role-tag" id="r-4"></div></div>
+                <div class="seat-name">Slayer_X</div>
+            </div>
+            <div id="seat-5" class="seat" style="bottom: 75px; left: 25px;" onclick="castVote(5)">
+                <div class="avatar-frame">🧛<div class="vote-badge" id="v-5">0</div><div class="role-tag" id="r-5"></div></div>
+                <div class="seat-name">VampLord</div>
+            </div>
+            <div id="seat-6" class="seat" style="top: 75px; left: 25px;" onclick="castVote(6)">
+                <div class="avatar-frame">🤖<div class="vote-badge" id="v-6">0</div><div class="role-tag" id="r-6"></div></div>
+                <div class="seat-name">Matrix_9</div>
             </div>
         </div>
 
-        <div class="status-box" id="game-status">Sistem hazır. Namluyu döndürmek için butona basın!</div>
-        
-        <button class="btn" id="action-btn" onclick="spinChamber()">🔄 ÇARKI ÇEVİR</button>
-    </div>
-
-    <script>
-        let currentRotation = 0;
-        let isGameOver = false;
-        let chamberIndex = 0;
-        const totalChambers = 6;
-        const bulletPosition = Math.floor(Math.random() * totalChambers);
-
-        function spinChamber() {
-            if (isGameOver) return;
-
-            document.getElementById('action-btn').disabled = true;
-            document.getElementById('game-status').innerText = "⚡ Namlu hızla dönüyor...";
-
-            const targetTurn = Math.random() < 0.5 ? "player" : "bot";
-            let targetAngle = 0;
-
-            if (targetTurn === "player") {
-                targetAngle = 0; 
-                chamberIndex = 0;
-            } else {
-                targetAngle = 180; 
-                chamberIndex = 3;
-            }
-
-            const extraSpins = (Math.floor(Math.random() * 3) + 4) * 360; 
-            currentRotation += extraSpins + (targetAngle - (currentRotation % 360));
-            
-            document.getElementById('gun-shaft').style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(() => {
-                triggerResult(targetTurn);
-            }, 2100);
-        }
-
-        function triggerResult(turn) {
-            const statusDisplay = document.getElementById('game-status');
-            
-            if (turn === "player") {
-                document.getElementById('player-node').classList.add('active-turn');
-                statusDisplay.innerText = "🚨 Sıra sizde! Tetik çekiliyor...";
-                
-                setTimeout(() => {
-                    document.getElementById('player-node').classList.remove('active-turn');
-                    if (chamberIndex === bulletPosition) {
-                        statusDisplay.innerText = "💥 GÜM! Silah patladı, elendiniz.";
-                        document.getElementById('player-node').classList.add('dead');
-                        endSession();
-                    } else {
-                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Hayattasınız.";
-                        resetTurnButton();
-                    }
-                }, 1200);
-
-            } else {
-                document.getElementById('bot-node').classList.add('active-turn');
-                statusDisplay.innerText = "👤 Sıra Rakipte! Tetik çekiliyor...";
-                
-                setTimeout(() => {
-                    document.getElementById('bot-node').classList.remove('active-turn');
-                    if (chamberIndex === bulletPosition) {
-                        statusDisplay.innerText = "💥 GÜM! Silah rakibin elinde patladı! Kazandınız.";
-                        document.getElementById('bot-node').classList.add('dead');
-                        endSession();
-                    } else {
-                        statusDisplay.innerText = "🔒 *TIK*... Silah boş çıktı! Rakip hayatta kaldı.";
-                        resetTurnButton();
-                    }
-                }, 1200);
-            }
-        }
-
-        function resetTurnButton() {
-            document.getElementById('action-btn').disabled = false;
-            document.getElementById('action-btn').innerText = "🔄 YENİDEN ÇEVİR";
-        }
-
-        function endSession() {
-            isGameOver = true;
-            const actionBtn = document.getElementById('action-btn');
-            actionBtn.disabled = false;
-            actionBtn.innerText = "🔄 YENİDEN BAŞLAT";
-            actionBtn.onclick = () => { location.reload(); };
-        }
-    </script>
-</body>
-</html>
+        <!-- Duyuru Paneli -->
