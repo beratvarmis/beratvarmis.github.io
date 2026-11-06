@@ -3,33 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamer Arena - Cyber Warfare</title>
+    <title>Gamer Arena - Cyber Warfare (Singleplayer)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Consolas', 'Courier New', monospace; }
         body { background-color: #050508; color: #00ffcc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; overflow-x: hidden; }
         .matrix-bg { position: fixed; top:0; left:0; width:100vw; height:100vh; background: radial-gradient(circle, rgba(16,16,32,0) 0%, rgba(5,5,8,1) 80%); z-index: -1; }
         .container { background-color: rgba(10, 11, 18, 0.95); padding: 2rem; border-radius: 4px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.15); max-width: 450px; width: 100%; border: 2px solid #00ffcc; text-align: center; position: relative; }
-        .container::before { content: "SYSTEM: ACTIVE"; position: absolute; top: -12px; left: 20px; background: #050508; padding: 0 10px; font-size: 0.8rem; color: #ff0055; border: 1px solid #ff0055; }
-        h1 { color: #ff0055; font-size: 2rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 0.25rem; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
-        .status { font-size: 0.8rem; color: #00ffcc; background: rgba(0,255,204,0.05); padding: 6px; border: 1px dashed #00ffcc; margin-bottom: 1.5rem; text-transform: uppercase; }
+        .container::before { content: "SYSTEM: SINGLE-PLAYER MODE"; position: absolute; top: -12px; left: 20px; background: #050508; padding: 0 10px; font-size: 0.8rem; color: #ff0055; border: 1px solid #ff0055; }
+        h1 { color: #ff0055; font-size: 2rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 1.5rem; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
         .stats-panel { background: rgba(255,255,255,0.02); border: 1px solid #1f2937; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; text-align: left; }
         .stat-label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; display: flex; justify-content: space-between; }
         .bar-container { width: 100%; background-color: #11131e; height: 16px; border: 1px solid #374151; margin-bottom: 0.8rem; padding: 2px; }
-        .bar-fill { height: 100%; width: 100%; transition: width 0.4s ease; }
-        .hp-fill { background: linear-gradient(90deg, #ff0055, #ff5500); box-shadow: 0 0 8px rgba(255, 0, 85, 0.5); }
-        .ep-fill { background: linear-gradient(90deg, #00ffcc, #0088ff); box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
-        .game-box { background-color: #0d0e15; padding: 1.25rem; border-radius: 4px; border: 1px solid #ff0055; margin-bottom: 1.5rem; min-height: 110px; display: flex; flex-direction: column; justify-content: center; }
-        .log-owner { font-size: 0.85rem; color: #ff0055; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .result { font-size: 1.1rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.5rem; }
+        .bar-fill { height: 100%; transition: width 0.3s ease; }
+        .player-hp { background: linear-gradient(90deg, #00ffcc, #0088ff); box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
+        .bot-hp { background: linear-gradient(90deg, #ff0055, #ff5500); box-shadow: 0 0 8px rgba(255, 0, 85, 0.5); }
+        .game-box { background-color: #0d0e15; padding: 1.25rem; border-radius: 4px; border: 1px solid #ff0055; margin-bottom: 1.5rem; min-height: 120px; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .log-line { font-size: 0.9rem; margin-bottom: 6px; line-height: 1.4; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn { background: transparent; color: #00ffcc; border: 1px solid #00ffcc; padding: 0.85rem; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.15s ease; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { background: rgba(0, 255, 204, 0.1); box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
-        .btn:active { background: rgba(0, 255, 204, 0.3); }
-        .btn-ult { grid-column: span 2; color: #ff0055; border-color: #ff0055; }
-        .btn-ult:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
+        .btn:disabled { color: #4b5563; border-color: #374151; cursor: not-allowed; box-shadow: none; background: transparent; }
+        .btn-reset { grid-column: span 2; color: #ff0055; border-color: #ff0055; display: none; }
+        .btn-reset:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
     </style>
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
@@ -37,135 +33,145 @@
 
     <div class="container">
         <h1>CYBER WARFARE</h1>
-        <div class="status" id="lobby-status">LOADING SYSTEM...</div>
         
         <div class="stats-panel">
-            <div class="stat-label"><span>HP</span><span id="hp-text">100 / 100</span></div>
+            <div class="stat-label"><span>USER HEALTH (HP)</span><span id="player-text">100 / 100</span></div>
             <div class="bar-container">
-                <div class="bar-fill hp-fill" id="hp-bar" style="width: 100%;"></div>
+                <div class="bar-fill player-hp" id="player-bar" style="width: 100%;"></div>
             </div>
             
-            <div class="stat-label"><span>ENERGY</span><span id="ep-text">20 / 100</span></div>
+            <div class="stat-label"><span>BOT CPU INTEGRITY</span><span id="bot-text">100 / 100</span></div>
             <div class="bar-container">
-                <div class="bar-fill ep-fill" id="ep-bar" style="width: 20%;"></div>
+                <div class="bar-fill bot-hp" id="bot-bar" style="width: 100%;"></div>
             </div>
         </div>
 
         <div class="game-box">
-            <div id="log-owner" class="log-owner">ANALYSIS:</div>
-            <div class="result" id="game-result">Lobi aktif. Muharebeye hazır olun...</div>
+            <div class="log-line" id="player-log" style="color: #00ffcc;">> Savaş simülasyonu başlatıldı.</div>
+            <div class="log-line" id="bot-log" style="color: #ff0055;">> Yapay zeka çevrimiçi, hamle bekliyor.</div>
         </div>
         
         <div class="btn-grid">
-            <button class="btn" onclick="sendAction('attack')">⚔️ SALDIR (-20 EP)</button>
-            <button class="btn" onclick="sendAction('charge')">⚡ ŞARJ ET (+40 EP)</button>
-            <button class="btn" onclick="sendAction('defend')">🛡️ KALKAN (+15 HP)</button>
-            <button class="btn" onclick="sendAction('repair')">🔧 TAMİR ET (-40 EP)</button>
-            <button class="btn btn-ult" onclick="sendAction('laser')">☣️ SİBER LAZERİ ATEŞLE (-100 EP)</button>
+            <button class="btn game-btn" onclick="playerAction('attack')">⚔️ SALDIR</button>
+            <button class="btn game-btn" onclick="playerAction('defend')">🛡️ KALKAN</button>
+            <button class="btn game-btn" onclick="playerAction('charge')">⚡ ŞARJ ET</button>
+            <button class="btn game-btn" onclick="playerAction('hack')">☣️ SİBER HACK</button>
+            <button class="btn btn-reset" id="reset-btn" onclick="resetGame()">🔄 SİMÜLASYONU YENİDEN BAŞLAT</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            databaseURL: "https://firebaseio.com"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const gameRef = database.ref('cyber_warfare');
+        let playerHP = 100;
+        let botHP = 100;
+        let playerShield = false;
+        let botShield = false;
 
-        let currentHP = 100;
-        let currentEP = 20;
-        const myPlayerId = "Gamer_" + Math.floor(Math.random() * 899 + 100);
+        function updateUI() {
+            document.getElementById('player-bar').style.width = playerHP + "%";
+            document.getElementById('player-text').innerText = playerHP + " / 100";
+            document.getElementById('bot-bar').style.width = botHP + "%";
+            document.getElementById('bot-text').innerText = botHP + " / 100";
 
-        gameRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('lobby-status').innerText = "ONLINE // ID: " + myPlayerId;
-                document.getElementById('log-owner').innerText = "ACTION // " + data.player + ":";
-                document.getElementById('game-result').innerText = data.logText;
-                updateBars(data.globalHP, data.globalEP);
+            if (playerHP <= 0 || botHP <= 0) {
+                const btns = document.querySelectorAll('.game-btn');
+                btns.forEach(b => b.disabled = true);
+                document.getElementById('reset-btn').style.display = 'block';
+            }
+        }
+
+        function playerAction(type) {
+            if (playerHP <= 0 || botHP <= 0) return;
+            
+            playerShield = false;
+            let log = "";
+
+            if (type === 'attack') {
+                let damage = Math.floor(Math.random() * 16) + 10;
+                if (botShield) {
+                    damage = Math.floor(damage * 0.3);
+                    log = `> Saldırdınız! Bot kalkan kullandığı için hafif hasar aldı: -${damage} HP.`;
+                } else {
+                    log = `> Kritik veri paketleriyle saldırdınız: Bot -${damage} HP hasar aldı.`;
+                }
+                botHP = Math.max(0, botHP - damage);
+            } else if (type === 'defend') {
+                playerShield = true;
+                log = "> Güvenlik duvarını çektiniz! Bir sonraki tur gelecek hasarı engelleyeceksiniz.";
+            } else if (type === 'charge') {
+                let heal = Math.floor(Math.random() * 11) + 10;
+                playerHP = Math.min(100, playerHP + heal);
+                log = `> Hücreleri şarj ettiniz: +${heal} HP sistem sağlığı kazanıldı.`;
+            } else if (type === 'hack') {
+                if (Math.random() < 0.6) {
+                    let damage = Math.floor(Math.random() * 16) + 25;
+                    botHP = Math.max(0, botHP - damage);
+                    log = `> SİBER HACK BAŞARILI! Bot yazılımı ağır hasar aldı: -${damage} HP.`;
+                } else {
+                    log = "> SİBER HACK BAŞARISIZ! Bot güvenlik duvarına takıldınız, hamleniz boşa gitti.";
+                }
+            }
+
+            document.getElementById('player-log').innerText = log;
+            updateUI();
+
+            if (botHP > 0) {
+                setTimeout(botAction, 600);
             } else {
-                document.getElementById('lobby-status').innerText = "ONLINE // SIGNAL WAITING";
-                resetDatabase();
+                document.getElementById('bot-log').innerText = "> SİSTEM MESAJI: ZAFER! Yapay zeka çekirdeği tamamen imha edildi.";
             }
-        });
-
-        function resetDatabase() {
-            gameRef.set({
-                player: "SYSTEM",
-                logText: "Savaş alanı temizlendi. İlk hamleyi yapın!",
-                globalHP: 100,
-                globalEP: 20
-            });
         }
 
-        function updateBars(hp, ep) {
-            currentHP = hp;
-            currentEP = ep;
-            document.getElementById('hp-bar').style.width = currentHP + "%";
-            document.getElementById('hp-text').innerText = currentHP + " / 100";
-            document.getElementById('ep-bar').style.width = currentEP + "%";
-            document.getElementById('ep-text').innerText = currentEP + " / 100";
+        function botAction() {
+            botShield = false;
+            let log = "";
+            let choice = Math.random();
+
+            if (botHP < 30 && Math.random() < 0.5) {
+                let heal = Math.floor(Math.random() * 11) + 12;
+                botHP = Math.min(100, botHP + heal);
+                log = `> Bot acil tamir protokolünü çalıştırdı: +${heal} CPU kazandı.`;
+            } else if (choice < 0.4) {
+                let damage = Math.floor(Math.random() * 16) + 10;
+                if (playerShield) {
+                    damage = Math.floor(damage * 0.3);
+                    log = `> Bot karşı saldırı yaptı! Kalkanınız sayesinde hafif atlattınız: -${damage} HP.`;
+                } else {
+                    log = `> Bot ana kartınıza sızdı ve hasar vurdu: -${damage} HP.`;
+                }
+                playerHP = Math.max(0, playerHP - damage);
+            } else if (choice < 0.7) {
+                botShield = true;
+                log = "> Bot şifreli kalkan modunu aktif etti.";
+            } else {
+                let damage = Math.floor(Math.random() * 11) + 20;
+                if (playerShield) {
+                    damage = Math.floor(damage * 0.3);
+                    log = `> Bot yüksek frekanslı lazer denedi! Kalkanınız hasarı emdi: -${damage} HP.`;
+                } else {
+                    log = `> Bot yüksek frekanslı lazer ateşledi: -${damage} HP ağır hasar aldınız!`;
+                }
+                playerHP = Math.max(0, playerHP - damage);
+            }
+
+            document.getElementById('bot-log').innerText = log;
+            updateUI();
+
+            if (playerHP <= 0) {
+                document.getElementById('player-log').innerText = "> SİSTEM MESAJI: BAĞLANTI KOPARILDI. Bot sizi alt etti.";
+            }
         }
 
-        function sendAction(actionType) {
-            let logMessage = "";
-            let nextHP = currentHP;
-            let nextEP = currentEP;
-
-            if (currentHP <= 0) {
-                resetDatabase();
-                return;
-            }
-
-            if (actionType === 'attack') {
-                if (currentEP < 20) {
-                    alert("Yetersiz enerji!");
-                    return;
-                }
-                nextEP = Math.max(0, currentEP - 20);
-                let damage = Math.floor(Math.random() * 21) + 15;
-                nextHP = Math.max(0, currentHP - damage);
-                logMessage = "Sisteme siber saldırı düzenledi ve " + damage + " hasar verdi!";
-                if (nextHP <= 0) logMessage += " 💀 SİSTEM ÇÖKTÜ! OYUN BİTTİ.";
-            } 
-            else if (actionType === 'charge') {
-                nextEP = Math.min(100, currentEP + 40);
-                logMessage = "Güç sürücüsünü şarj etti. +40 Enerji kazanıldı.";
-            } 
-            else if (actionType === 'defend') {
-                nextHP = Math.min(100, currentHP + 15);
-                logMessage = "Güvenlik duvarını devreye soktu. +15 Sağlık kazanıldı.";
-            } 
-            else if (actionType === 'repair') {
-                if (currentEP < 40) {
-                    alert("Yetersiz enerji!");
-                    return;
-                }
-                nextEP = Math.max(0, currentEP - 40);
-                nextHP = Math.min(100, currentHP + 35);
-                logMessage = "Çekirdek tamir protokolünü çalıştırdı. +35 Sağlık kazanıldı.";
-            }
-            else if (actionType === 'laser') {
-                if (currentEP < 100) {
-                    alert("Enerji barı %100 dolu olmalıdır!");
-                    return;
-                }
-                nextEP = 0;
-                let laserDamage = Math.floor(Math.random() * 26) + 50;
-                nextHP = Math.max(0, currentHP - laserDamage);
-                logMessage = "Ölümcül siber lazeri ateşledi ve " + laserDamage + " devasa hasar vurdu!";
-                if (nextHP <= 0) logMessage += " 💀 SİSTEM ÇÖKTÜ! OYUN BİTTİ.";
-            }
-
-            gameRef.set({
-                player: myPlayerId,
-                logText: logMessage,
-                globalHP: nextHP,
-                globalEP: nextEP,
-                timestamp: Date.now()
-            });
+        function resetGame() {
+            playerHP = 100;
+            botHP = 100;
+            playerShield = false;
+            botShield = false;
+            document.getElementById('player-log').innerText = "> Savaş simülasyonu yeniden başlatıldı.";
+            document.getElementById('bot-log').innerText = "> Yapay zeka çevrimiçi, hamle bekliyor.";
+            document.getElementById('reset-btn').style.display = 'none';
+            const btns = document.querySelectorAll('.game-btn');
+            btns.forEach(b => b.disabled = false);
+            updateUI();
         }
     </script>
 </body>
