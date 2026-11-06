@@ -115,13 +115,13 @@
         function handleKeyPress(e){if(e.key==='Enter')sendPlayerMessage();}
         function simulateBotNight(){pushLog("SİSTEM","Gece oldu, kasaba derin bir sessizliğe büründü...", true);}
         function simulateBotDiscussion(){
-            document.getElementById('seat-4').classList.add('eliminated');players[4].alive=false;updateAliveCount();
+            document.getElementById('seat-4').classList.add('eliminated');players.alive=false;updateAliveCount();
             pushLog("SİSTEM","SABAH OLDU! Slayer_X (No 4) bu gece katledildi.",true);
             setTimeout(()=>{pushLog("DarkKnight","Bence 5 numara dün gece etrafta dolanıyordu.",false);},3000);
             setTimeout(()=>{pushLog("VampLord","Asıl 3 numara hedef saptırıyor, ben masumum.",false);},7000);
             setTimeout(()=>{pushLog("Matrix_9","Oylama başlayınca okları 3 numaraya çevirelim.",false);},12000);
         }
-        function activateVotingUI(){for(let i=1;i<=6;i++){if(players[i].alive&&!players[i].isUser)document.getElementById(`seat-${i}`).classList.add('voting-active');}setTimeout(()=>{if(players[3].alive){playerVotes[3]+=2;document.getElementById('v-3').innerText=playerVotes[3];document.getElementById('v-3').style.display='flex';pushLog("SİSTEM","Gamer_234 ve Matrix_9 oylarını kullandı.",true);}},4000);}
+        function activateVotingUI(){for(let i=1;i<=6;i++){if(players[i].alive&&!players[i].isUser)document.getElementById(`seat-${i}`).classList.add('voting-active');}setTimeout(()=>{if(players.alive){playerVotes+=2;document.getElementById('v-3').innerText=playerVotes;document.getElementById('v-3').style.display='flex';pushLog("SİSTEM","Gamer_234 ve Matrix_9 oylarını kullandı.",true);}},4000);}
         function castVote(tId){
             if(currentPhase !== 3 || hasVoted || !players[tId].alive || players[tId].isUser) return;
             hasVoted=true;playerVotes[tId]++;document.getElementById(`v-${tId}`).innerText=playerVotes[tId];document.getElementById(`v-${tId}`).style.display='flex';
@@ -131,13 +131,13 @@
         function calculateVotes(){
             let maxVotes=0,elId=0;for(let i=1;i<=6;i++){if(playerVotes[i]>maxVotes){maxVotes=playerVotes[i];elId=i;}}
             if(elId===3){
-                document.getElementById('seat-3').classList.add('eliminated');players[3].alive=false;
+                document.getElementById('seat-3').classList.add('eliminated');players.alive=false;
                 pushLog("SİSTEM","DarkKnight (No 3) asıldı! Rolü: VAMPİR.",true);pushLog("SİSTEM", "KÖYLÜLER KAZANDI!", true);
                 clearInterval(timerInterval);document.getElementById('game-phase').innerText="MAÇ BİTTİ";document.getElementById('announcement-bar').innerText="Zafer!";
             }else{pushLog("SİSTEM","Oylamada eşitlik oldu. Savaş devam ediyor!",true);setTimeout(()=>{runPhase(1);},5000);}
         }
-        function clearTableEffects(){for(let i=1;i<=6;i++){document.getElementById(`seat-${i}`).classList.remove('voting-active');document.getElementById(`v-${i}`).style.display='none';playerVotes[i]=0;}updateAliveCount();}
-        function updateAliveCount(){let c=0;for(let i=1;i<=6;i++){if(players[i].alive)c++;}document.getElementById('alive-display').innerText=`${c} / 6`;}
+        function clearTableEffects(){for(let i=1;i<=6;i++){document.getElementById(`seat-${i}`).classList.remove('voting-active');if(document.getElementById(`v-${i}`)) document.getElementById(`v-${i}`).style.display='none';playerVotes[i]=0;}updateAliveCount();}
+        function updateAliveCount(){let c=0;for(let i=1;i<=6;i++){if(players[i].alive) c++;}document.getElementById('alive-display').innerText=`${c} / 6`;}
     </script>
 </body>
 </html>
