@@ -1,81 +1,46 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canlı Oyun Lobisi</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0b0f19; color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background-color: #111827; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 450px; width: 100%; border: 1px solid #1f2937; text-align: center; }
-        h1 { color: #3b82f6; font-size: 1.8rem; margin-bottom: 1.5rem; }
-        .game-box { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; border: 1px solid #374151; margin-bottom: 1.5rem; }
-        .status { font-size: 0.9rem; color: #9ca3af; margin-bottom: 1rem; }
-        .result { font-size: 2rem; font-weight: bold; margin: 1.5rem 0; color: #f59e0b; min-height: 3rem; }
-        .btn { display: block; width: 100%; background: linear-gradient(45deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 0.85rem; border-radius: 0.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 0.5rem; }
-        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .btn-dice { background: linear-gradient(45deg, #ec4899, #be185d); }
-    </style>
-
     <!-- Canlı Bağlantı İçin Firebase Kütüphaneleri -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
-</head>
-<body>
-
-    <div class="container">
-        <h1>Canlı Oyun Odası 🎲</h1>
-        <div class="status" id="lobby-status">Canlı veritabanına bağlanılıyor...</div>
-        
-        <div class="game-box">
-            <div id="action-owner" style="font-size: 0.9rem; color: #10b981; height: 1.2rem;"></div>
-            <div class="result" id="game-result">⌛ Bekleniyor...</div>
-            
-            <button class="btn" onclick="playGame('coin')">🪙 Yazı-Tura At</button>
-            <button class="btn btn-dice" onclick="playGame('dice')">🎲 Zar Fırlat</button>
-        </div>
-        
-        <p style="font-size: 0.8rem; color: #6b7280;">Bu ekrandaki tüm sonuçlar odadaki herkesle anlık olarak aynıdır.</p>
-    </div>
 
     <script>
-        // ÜCRETSİZ CANLI VERİTABANI BAĞLANTISI (HERKESE AÇIK GEÇİCİ TEST VERİTABANI)
+        // CANLI VERİTABANI BAĞLANTISI
         const firebaseConfig = {
             databaseURL: "https://firebaseio.com"
         };
         
-        // Firebase Başlatılıyor
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const gameRef = database.ref('live_game');
 
-        // Kullanıcıya rastgele geçici bir Numara verelim (Kim attı görmek için)
-        const myPlayerId = "Oyuncu_" + Math.floor(Math.random() * 900 + 100);
+        // Her girişte rastgele oyuncu adı (Gamer_123 vb.)
+        const myPlayerId = "Gamer_" + Math.floor(Math.random() * 900 + 100);
 
-        // VERİTABANINDAN CANLI VERİ GELDİĞİNDE EKRANI GÜNCELLE (Multiplayer Kısmı)
+        // VERİTABANINDAN CANLI VERİ GELDİĞİNDE EKRANI GÜNCELLE
         gameRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 document.getElementById('lobby-status').innerText = "🟢 Odaya Canlı Bağlısınız (" + myPlayerId + ")";
-                document.getElementById('action-owner').innerText = data.player + " hamle yaptı:";
+                document.getElementById('action-owner').innerText = data.player + " tetiği çekti:";
                 document.getElementById('game-result').innerText = data.result;
             } else {
-                document.getElementById('lobby-status').innerText = "🟢 Oda Aktif (Hamle Bekleniyor)";
+                document.getElementById('lobby-status').innerText = "🟢 Oda Aktif (Tetiği Çekecek Birini Bekliyor)";
             }
         });
 
-        // BUTONA BASILDIĞINDA VERİYİ CANLI SUNUCUYA GÖNDER
-        function playGame(type) {
+        // TETİK ÇEKME FONKSİYONU
+        function rollNumber() {
             let finalResult = "";
             
-            if (type === 'coin') {
-                finalResult = Math.random() < 0.5 ? "🪙 YAZI GELDİ!" : "🪙 TURA GELDİ!";
-            } else if (type === 'dice') {
-                const diceRoll = Math.floor(Math.random() * 6) + 1;
-                finalResult = "🎲 ZAR: " + diceRoll + " GELDİ!";
+            // %15 ihtimalle silah patlar, %85 ihtimalle boş çıkar
+            const sans = Math.random();
+            
+            if (sans < 0.15) {
+                finalResult = "💥 GÜM! ELENDİNİZ!";
+            } else {
+                finalResult = "🔒 *TIK*... Silah Boş Çıktı! Sıra Diğerinde.";
             }
 
-            // Veritabanına yazıyoruz. Biz yazdığımız an odadaki herkesin ekranı otomatik değişecek!
+            // Sonucu canlı veritabanına gönderiyoruz, arkadaşının ekranı da anlık değişecek
             gameRef.set({
                 player: myPlayerId,
                 result: finalResult,
@@ -83,5 +48,3 @@
             });
         }
     </script>
-</body>
-</html>
