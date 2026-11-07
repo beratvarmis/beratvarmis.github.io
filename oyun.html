@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - Block Blast Master Cyber Evolution</title>
+    <title>NoxilMC - Block Blast Master Premium</title>
     <style>
         html, body {
             margin: 0; padding: 0; overflow: hidden;
@@ -47,7 +47,7 @@
         <div id="score-board">NOXILMC BLAST — SKOR: <span id="skorText">0</span> <span id="seviyeText" style="color:#ff9f1a; margin-left:10px;">(TEMA 1)</span></div>
         <canvas id="gameCanvas" width="410" height="580"></canvas>
         
-        <div id="gameover-screen" id="gameoverBox">
+        <div id="gameover-screen">
             <span>YER KALMADI!</span><br>
             <button class="restart-btn" onclick="oyunuSifirla()">Tekrar Dene</button>
         </div>
@@ -69,7 +69,6 @@
 
         let tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
         
-        // 🌟 EVRİM GEÇİREN RENK TEMALARI (Her 1000 Puanda Değişir)
         const temalar = [
             { bg: '#05070f', kutu: '#111827', sınır: '#1f2937', palet: ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'] },
             { bg: '#0f051d', kutu: '#1a0b2e', sınır: '#3b1466', palet: ['#ff00ff', '#9900ff', '#ff0055', '#00ffff', '#ffcc00', '#ff3333'] },
@@ -78,17 +77,25 @@
         ];
 
         const b_sekiller = [
-            [], [], [,], [], [,], [,], [,], [,,], [,,]
+            [[1]], 
+            [[1, 1]], 
+            [[1], [1]], 
+            [[1, 1, 1]], 
+            [[1, 1], [1, 1]], 
+            [[0, 1, 1], [1, 1, 0]], 
+            [[0, 1, 0], [1, 1, 1]], 
+            [[1, 0, 0], [1, 0, 0], [1, 1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
         ];
 
-        let secenekler =;
+        let secenekler = [];
         let seciliBlokIndeks = -1;
         let surukleniyorMu = false;
         let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
 
-        let parcaciklar =;
-        let izParcaciklari =;
-        let lazerSeritleri =; // Aktif kırılacak şerit animasyon havuzu
+        let parcaciklar = [];
+        let izParcaciklari = [];
+        let lazerSeritleri = []; 
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let sesCtx = null;
@@ -101,7 +108,6 @@
             }
         }
 
-        // 🔊 SES SEVİYESİ YÜKSELTİLDİ (Gain Değeri 0.3'ten 0.8'e Çıkarıldı!)
         function blokKırılmaSesiCal() {
             if (!sesCtx) return;
             let osc = sesCtx.createOscillator();
@@ -109,15 +115,14 @@
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(200 + Math.random() * 150, sesCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(30, sesCtx.currentTime + 0.25);
-            gain.gain.setValueAtTime(0.8, sesCtx.currentTime); // Gür ses!
+            gain.gain.setValueAtTime(0.8, sesCtx.currentTime); 
             gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.25);
             osc.connect(gain); gain.connect(sesCtx.destination);
             osc.start(); osc.stop(sesCtx.currentTime + 0.25);
         }
 
-        // 🔊 FON MÜZİĞİ SESİ ARTIRILDI (0.04'ten 0.12'ye Yükseltildi!)
         function arkaPlanMuzigiCal() {
-            const notalar =;
+            const notalar = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00];
             muzikZamanlayici = setInterval(() => {
                 if (oyunBitti || !sesCtx) return;
                 if (Math.random() < 0.6) {
@@ -126,7 +131,7 @@
                     let gain = sesCtx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime);
-                    gain.gain.setValueAtTime(0.12, sesCtx.currentTime); // Daha net müzik sesi
+                    gain.gain.setValueAtTime(0.12, sesCtx.currentTime); 
                     gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.4);
                     osc.connect(gain); gain.connect(sesCtx.destination);
                     osc.start(); osc.stop(sesCtx.currentTime + 1.4);
@@ -145,7 +150,7 @@
         }
 
         function yeniParcalariUret() {
-            secenekler =;
+            secenekler = [];
             let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
@@ -170,6 +175,27 @@
             }
         }
 
+        function onIzlemeSeritleriniHesapla(s, hR, hC) {
+            let geçiciSatirlar = []; let geçiciSutunlar = [];
+            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar: [], sutunlar: [] };
+
+            let sanalTahta = tahta.map(row => [...row]);
+            for (let r = 0; r < s.matris.length; r++) {
+                for (let c = 0; c < s.matris[r].length; c++) {
+                    if (s.matris[r][c] === 1) sanalTahta[hR + r][hC + c] = s.renk;
+                }
+            }
+            for (let r = 0; r < tahtaBoyutu; r++) {
+                if (sanalTahta[r].every(kare => kare !== 0)) geçiciSatirlar.push(r);
+            }
+            for (let c = 0; c < tahtaBoyutu; c++) {
+                let dolumu = true;
+                for (let r = 0; r < tahtaBoyutu; r++) { if (sanalTahta[r][c] === 0) dolumu = false; }
+                if (dolumu) geçiciSutunlar.push(c);
+            }
+            return { satirlar: geçiciSatirlar, sutunlar: geçiciSutunlar };
+        }
+
         function ekranCiz() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -190,9 +216,24 @@
             }
 
             if (surukleniyorMu && seciliBlokIndeks !== -1) {
+                let s = secenekler[seciliBlokIndeks];
+                let mC = Math.round((s.x - tahtaOfsetX) / (hucreBoyutu + bosluk));
+                let mR = Math.round((s.y - tahtaOfsetY) / (hucreBoyutu + bosluk));
+                let önIzleme = onIzlemeSeritleriniHesapla(s, mR, mC);
+
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.25)'; 
+                önIzleme.satirlar.forEach(r => {
+                    let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
+                    ctx.fillRect(tahtaOfsetX, y, tahtaBoyutu * (hucreBoyutu + bosluk), hucreBoyutu);
+                });
+                önIzleme.sutunlar.forEach(c => {
+                    let x = tahtaOfsetX + c * (hucreBoyutu + bosluk);
+                    ctx.fillRect(x, tahtaOfsetY, hucreBoyutu, tahtaBoyutu * (hucreBoyutu + bosluk));
+                });
+
                 izParcaciklari.push({
                     x: fareX + (Math.random() - 0.5) * 30, y: fareY + (Math.random() - 0.5) * 30,
-                    renk: secenekler[seciliBlokIndeks].renk, boyut: Math.random() * 3 + 1, omur: 1.0
+                    renk: s.renk, boyut: Math.random() * 3 + 1, omur: 1.0
                 });
             }
 
@@ -287,7 +328,7 @@
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
                     if (s.matris[r][c] === 1) {
-                        let tr = hedefR + r; let tc = hedefC + c;
+                        let tr = hedefR + r; let tc = codebase = hedefC + c;
                         if (tr >= tahtaBoyutu || tc >= tahtaBoyutu || tr < 0 || tc < 0 || tahta[tr][tc] !== 0) return false;
                     }
                 }
