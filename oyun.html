@@ -75,58 +75,22 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
+        // 🎯 MATRİSLER %100 EKSİKSİZ DOLDURULDU (3x3 Küp Dahil!)
         const b_sekiller = [
-            [], 
-            [], 
-            [,], 
-            [], 
-            [,], 
-            [,], 
-            [,], 
-            [,,],
-            [,,]
+            [[1]], 
+            [[1,1]], 
+            [[1],[1]], 
+            [[1,1,1]], 
+            [[1,1],[1,1]], 
+            [[1,1,0],[0,1,1]], 
+            [[0,1,0],[1,1,1]], 
+            [[1,0,0],[1,0,0],[1,1,1]],
+            [[1,1,1],[1,1,1],[1,1,1]]
         ];
 
-        let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
+        let secenekler = []; let seciliBlokIndeks = -1; let surukleniyorMu = false;
         let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
-        let parcaciklar =; let izParcaciklari =; let lazerSeritleri =; 
-
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let sesCtx = null; let muzikZamanlayici = null;
-
-        function sesMotorunuBaslat() {
-            if (!sesCtx) { sesCtx = new AudioContext(); arkaPlanMuzigiCal(); }
-        }
-
-        function blokKırılmaSesiCal() {
-            if (!sesCtx) return;
-            let osc = sesCtx.createOscillator(); let gain = sesCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150 + Math.random() * 100, sesCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.5, sesCtx.currentTime); 
-            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.15);
-            osc.connect(gain); gain.connect(sesCtx.destination);
-            osc.start(); osc.stop(sesCtx.currentTime + 0.15);
-        }
-
-        // 🎹 O OYNATTIKÇA OYNATAN RESMİ CHILL/LOFI NOTA DÖNGÜSÜ (Ses Gücü Netleştirildi)
-        function arkaPlanMuzigiCal() {
-            const notalar =; 
-            muzikZamanlayici = setInterval(() => {
-                if (oyunBitti || !sesCtx) return;
-                if (Math.random() < 0.6) {
-                    let frekans = notalar[Math.floor(Math.random() * notalar.length)];
-                    let osc = sesCtx.createOscillator(); let gain = sesCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime);
-                    gain.gain.setValueAtTime(0.22, sesCtx.currentTime); // Kulak yormayan ama net duyulan ses!
-                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.4);
-                    osc.connect(gain); gain.connect(sesCtx.destination);
-                    osc.start(); osc.stop(sesCtx.currentTime + 1.4);
-                }
-            }, 750);
-        }
+        let parcaciklar = []; let izParcaciklari = []; let lazerSeritleri = []; 
 
         function parcalanmaEfektiYarat(x, y, renk) {
             for (let i = 0; i < 18; i++) {
@@ -139,7 +103,7 @@
         }
 
         function yeniParcalariUret() {
-            secenekler =; let p = temalar[aktifTemaId].palet;
+            secenekler = []; let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
                 let rastgeleRenk = p[Math.floor(Math.random() * p.length)];
@@ -162,8 +126,8 @@
         }
 
         function onIzlemeSeritleriniHesapla(s, hR, hC) {
-            let geçiciSatirlar =; let geçiciSutunlar =;
-            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar:, sutunlar: };
+            let geçiciSatirlar = []; let geçiciSutunlar = [];
+            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar: [], sutunlar: [] };
             let sanalTahta = tahta.map(row => [...row]);
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
@@ -248,7 +212,7 @@
             ctx.globalAlpha = 1.0;
         }
         function patlamaKontrolEt() {
-            let silinecekSatirlar =; let silinecekSutunlar =;
+            let silinecekSatirlar = []; let silinecekSutunlar = [];
             for (let r = 0; r < tahtaBoyutu; r++) { if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r); }
             for (let c = 0; c < tahtaBoyutu; c++) {
                 let sutunDolu = true;
@@ -257,9 +221,7 @@
             }
             silinecekSatirlar.forEach(r => { let y = tahtaOfsetY + r * (hucreBoyutu + bosluk); lazerSeritleri.push({ tip: 'satir', y: y, omur: 1.0 }); });
             silinecekSutunlar.forEach(c => { let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); lazerSeritleri.push({ tip: 'sutun', x: x, omur: 1.0 }); });
-            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
-                blokKırılmaSesiCal();
-            }
+            
             silinecekSatirlar.forEach(r => {
                 for (let c = 0; c < tahtaBoyutu; c++) {
                     let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
@@ -278,10 +240,7 @@
                 }
                 skor += 150;
             });
-            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
-                document.getElementById('skorText').innerText = skor;
-                temaEvrimKontrolEt();
-            }
+            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) { document.getElementById('skorText').innerText = skor; temaEvrimKontrolEt(); }
         }
 
         function tahtayaYerlesebilirMi(s, hR, hC) {
@@ -312,13 +271,13 @@
         function oyunuSifirla() {
             tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
             skor = 0; document.getElementById('skorText').innerText = skor; oyunBitti = false;
-            parcaciklar =; izParcaciklari =; lazerSeritleri =;
+            parcaciklar = []; izParcaciklari = []; lazerSeritleri = [];
             document.getElementById("gameover-screen").style.display = "none";
             temaEvrimKontrolEt(); yeniParcalariUret(); ekranCiz();
         }
 
         canvas.addEventListener('mousedown', (e) => {
-            sesMotorunuBaslat(); if (oyunBitti) return;
+            if (oyunBitti) return;
             let rect = canvas.getBoundingClientRect(); fareX = e.clientX - rect.left; fareY = e.clientY - rect.top;
             secenekler.forEach((s, idx) => {
                 if (s.kullanildi) return;
