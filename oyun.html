@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NoxilMC - Block Blast RS Jantlar Edition</title>
+    <title>NoxilMC - Block Blast Master Premium</title>
     <style>
         html, body {
             margin: 0; padding: 0; overflow: hidden;
@@ -75,17 +75,16 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
-        // Şekil Matrisleri Sabitlendi (3x3 Küp Dahil)
         const b_sekiller = [
-            [[1]], 
-            [[1,1]], 
-            [[1],[1]], 
-            [[1,1,1]], 
-            [[1,1],[1,1]], 
-            [[0,1,1],[1,1,0]], 
-            [[0,1,0],[1,1,1]], 
-            [[1,0,0],[1,1,1]],
-            [[1,1,1],[1,1,1],[1,1,1]]
+            [], 
+            [], 
+            [,], 
+            [], 
+            [,], 
+            [,], 
+            [,], 
+            [,,],
+            [,,]
         ];
 
         let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
@@ -102,38 +101,31 @@
         function blokKırılmaSesiCal() {
             if (!sesCtx) return;
             let osc = sesCtx.createOscillator(); let gain = sesCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(300 + Math.random() * 200, sesCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.9, sesCtx.currentTime); 
-            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.3);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150 + Math.random() * 100, sesCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.5, sesCtx.currentTime); 
+            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.15);
             osc.connect(gain); gain.connect(sesCtx.destination);
-            osc.start(); osc.stop(sesCtx.currentTime + 0.3);
+            osc.start(); osc.stop(sesCtx.currentTime + 0.15);
         }
 
+        // 🎹 O OYNATTIKÇA OYNATAN RESMİ CHILL/LOFI NOTA DÖNGÜSÜ (Ses Gücü Netleştirildi)
         function arkaPlanMuzigiCal() {
-            const melodiNotaları = [293.66, 349.23, 440.00, 392.00, 349.23, 293.66, 261.63, 293.66]; 
-            let notaIndeks = 0;
+            const notalar =; 
             muzikZamanlayici = setInterval(() => {
                 if (oyunBitti || !sesCtx) return;
-                let siberZaman = sesCtx.currentTime;
-                
-                let kickOsc = sesCtx.createOscillator(); let kickGain = sesCtx.createGain();
-                kickOsc.type = 'sine'; kickOsc.frequency.setValueAtTime(90, siberZaman);
-                kickOsc.frequency.exponentialRampToValueAtTime(0.01, siberZaman + 0.25);
-                kickGain.gain.setValueAtTime(0.5, siberZaman); kickGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.25);
-                kickOsc.connect(kickGain); kickGain.connect(sesCtx.destination);
-                kickOsc.start(); kickOsc.stop(siberZaman + 0.25);
-
-                let melodiOsc = sesCtx.createOscillator(); let melodiGain = sesCtx.createGain();
-                melodiOsc.type = 'sawtooth';
-                let anlıkNota = melodiNotaları[notaIndeks % melodiNotaları.length];
-                melodiOsc.frequency.setValueAtTime(anlıkNota, siberZaman);
-                melodiGain.gain.setValueAtTime(0.28, siberZaman); melodiGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.4);
-                melodiOsc.connect(melodiGain); melodiGain.connect(sesCtx.destination);
-                melodiOsc.start(); melodiOsc.stop(siberZaman + 0.4);
-                notaIndeks++;
-            }, 450); 
+                if (Math.random() < 0.6) {
+                    let frekans = notalar[Math.floor(Math.random() * notalar.length)];
+                    let osc = sesCtx.createOscillator(); let gain = sesCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime);
+                    gain.gain.setValueAtTime(0.22, sesCtx.currentTime); // Kulak yormayan ama net duyulan ses!
+                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.4);
+                    osc.connect(gain); gain.connect(sesCtx.destination);
+                    osc.start(); osc.stop(sesCtx.currentTime + 1.4);
+                }
+            }, 750);
         }
 
         function parcalanmaEfektiYarat(x, y, renk) {
@@ -147,7 +139,7 @@
         }
 
         function yeniParcalariUret() {
-            secenekler = []; let p = temalar[aktifTemaId].palet;
+            secenekler =; let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
                 let rastgeleRenk = p[Math.floor(Math.random() * p.length)];
@@ -170,8 +162,8 @@
         }
 
         function onIzlemeSeritleriniHesapla(s, hR, hC) {
-            let geçiciSatirlar = []; let geçiciSutunlar = [];
-            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar: [], sutunlar: [] };
+            let geçiciSatirlar =; let geçiciSutunlar =;
+            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar:, sutunlar: };
             let sanalTahta = tahta.map(row => [...row]);
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
@@ -256,7 +248,7 @@
             ctx.globalAlpha = 1.0;
         }
         function patlamaKontrolEt() {
-            let silinecekSatirlar = []; let silinecekSutunlar = [];
+            let silinecekSatirlar =; let silinecekSutunlar =;
             for (let r = 0; r < tahtaBoyutu; r++) { if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r); }
             for (let c = 0; c < tahtaBoyutu; c++) {
                 let sutunDolu = true;
@@ -320,7 +312,7 @@
         function oyunuSifirla() {
             tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
             skor = 0; document.getElementById('skorText').innerText = skor; oyunBitti = false;
-            parcaciklar = []; izParcaciklari = []; lazerSeritleri = [];
+            parcaciklar =; izParcaciklari =; lazerSeritleri =;
             document.getElementById("gameover-screen").style.display = "none";
             temaEvrimKontrolEt(); yeniParcalariUret(); ekranCiz();
         }
