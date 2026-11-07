@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - Block Blast Master</title>
+    <title>NoxilMC - Block Blast Master Premium</title>
     <style>
         html, body {
             margin: 0;
@@ -54,6 +54,24 @@
             font-weight: bold;
             text-shadow: 0 0 15px #ff3366;
             z-index: 100;
+            text-align: center;
+        }
+        .restart-btn {
+            margin-top: 20px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            animation: butonNabiz 1s infinite alternate;
+            transition: 0.2s;
+        }
+        @keyframes butonNabiz {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(35, 134, 54, 0.6); }
+            100% { transform: scale(1.06); box-shadow: 0 0 25px #2ea043; }
         }
     </style>
 </head>
@@ -64,8 +82,8 @@
         <canvas id="gameCanvas" width="410" height="580"></canvas>
         
         <div id="gameover-screen">
-            OYUN BİTTİ!<br>
-            <span style="font-size: 16px; color: #fff; text-shadow: none; margin-top: 10px;">Yeniden başlamak için F5 yapın</span>
+            <span id="failReason">YER KALMADI!</span><br>
+            <button class="restart-btn" onclick="oyunuSifirla()">Tekrar Dene</button>
         </div>
     </div>
 
@@ -85,7 +103,7 @@
         let tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
         const renkPaleti = ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'];
 
-        // 🎯 Bütün matris sayıları eksiksiz dolduruldu, artık asla siyah ekran kalmayacak!
+        // Tüm Blok Kombinasyonları Sabitlendi
         const b_sekiller = [
             [[1]], 
             [[1, 1]], 
@@ -93,36 +111,97 @@
             [[1, 1, 1]], 
             [[1, 1], [1, 1]], 
             [[0, 1, 1], [1, 1, 0]], 
-            [[0, 1, 0], [1, 1, 1]], 
-            [[1, 0], [1, 0], [1, 1]]
+            [[1, 1, 1], [0, 1, 0]], 
+            [[1, 0], [1, 0], [1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
         ];
 
         let secenekler = [];
         let seciliBlokIndeks = -1;
         let surukleniyorMu = false;
-        let fareX = 0;
-        let fareY = 0;
-        let ofsetX = 0;
-        let ofsetY = 0;
+        let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
+
+        let parcaciklar = [];
+        let izParcaciklari = [];
+
+        // 🎵 TELİFSİZ SEYİR MÜZİĞİ VE SES SENTEZLEYİCİ ALTYAPISI
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let sesCtx = null;
+        let muzikZamanlayici = null;
+
+        function sesMotorunuBaslat() {
+            if (!sesCtx) {
+                sesCtx = new AudioContext();
+                arkaPlanMuzigiCal();
+            }
+        }
+
+        // 💥 BLOK KIRILMA PARÇALANMA SESİ (Her blok için küçük çıtırtı/patlama ses dalgası fırlatır)
+        function blokKırılmaSesiCal() {
+            if (!sesCtx) return;
+            let osc = sesCtx.createOscillator();
+            let gain = sesCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150 + Math.random() * 100, sesCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.3, sesCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(sesCtx.destination);
+            osc.start();
+            osc.stop(sesCtx.currentTime + 0.15);
+        }
+
+        // 🎹 SAKİN VE HUZURLU LOFI FON MÜZİĞİ (Arka arkaya tatlı piyano notaları dizer)
+        function arkaPlanMuzigiCal() {
+            const notalar = [261.63, 293.66, 329.63, 392.00, 440.00]; // Sakin Chill akorlar
+            let adim = 0;
+
+            muzikZamanlayici = setInterval(() => {
+                if (oyunBitti || !sesCtx) return;
+                
+                // Arada rastgele sakin bir melodi seç
+                if (Math.random() < 0.6) {
+                    let frekans = notalar[Math.floor(Math.random() * notalar.length)];
+                    let osc = sesCtx.createOscillator();
+                    let gain = sesCtx.createGain();
+                    
+                    osc.type = 'sine'; // En yumuşak ses dalgası
+                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime); // Lofi derinlik için kalın perdeden
+                    
+                    gain.gain.setValueAtTime(0.04, sesCtx.currentTime); // Arkada fısıltı gibi çalsın
+                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.2);
+                    
+                    osc.connect(gain);
+                    gain.connect(sesCtx.destination);
+                    osc.start();
+                    osc.stop(sesCtx.currentTime + 1.2);
+                }
+            }, 800); // 800 milisaniyede bir tatlı akor vuruşu
+        }
+
+        function parcalanmaEfektiYarat(x, y, renk) {
+            for (let i = 0; i < 15; i++) {
+                parcaciklar.push({
+                    x: x + hucreBoyutu / 2, y: y + hucreBoyutu / 2,
+                    vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 4) * 2,
+                    renk: renk, boyut: Math.random() * 4 + 2, omur: 1.0, yercekimi: 0.15
+                });
+            }
+        }
 
         function yeniParcalariUret() {
             secenekler = [];
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
                 let rastgeleRenk = renkPaleti[Math.floor(Math.random() * renkPaleti.length)];
-                
                 secenekler.push({
-                    matris: b_sekiller[rastgeleTip],
-                    renk: rastgeleRenk,
-                    orjX: 20 + i * 135,
-                    orjY: 440,
-                    x: 20 + i * 135,
-                    y: 440,
-                    kullanildi: false
+                    matris: b_sekiller[rastgeleTip], renk: rastgeleRenk,
+                    orjX: 20 + i * 135, orjY: 440, x: 20 + i * 135, y: 440, kullanildi: false
                 });
             }
+            hamleKontrolEt();
         }
-        yeniParcalariUret();
         function ekranCiz() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -130,57 +209,89 @@
                 for (let c = 0; c < tahtaBoyutu; c++) {
                     let x = tahtaOfsetX + c * (hucreBoyutu + bosluk);
                     let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
-                    
                     if (tahta[r][c] === 0) {
                         ctx.fillStyle = '#1a2438';
                         ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
                     } else {
                         ctx.fillStyle = tahta[r][c];
                         ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                        ctx.strokeRect(x, y, hucreBoyutu, hucreBoyutu);
                     }
                 }
             }
 
+            if (surukleniyorMu && seciliBlokIndeks !== -1) {
+                izParcaciklari.push({
+                    x: fareX + (Math.random() - 0.5) * 30, y: fareY + (Math.random() - 0.5) * 30,
+                    renk: secenekler[seciliBlokIndeks].renk, boyut: Math.random() * 3 + 1, omur: 1.0
+                });
+            }
+
+            for (let i = izParcaciklari.length - 1; i >= 0; i--) {
+                let p = izParcaciklari[i]; p.omur -= 0.04;
+                if (p.omur <= 0) { izParcaciklari.splice(i, 1); continue; }
+                ctx.fillStyle = p.renk; ctx.globalAlpha = p.omur;
+                ctx.fillRect(p.x, p.y, p.boyut, p.boyut);
+            }
+            ctx.globalAlpha = 1.0;
+
             secenekler.forEach((s, idx) => {
                 if (s.kullanildi) return;
-
                 let kucultme = (seciliBlokIndeks === idx && surukleniyorMu) ? 1.0 : 0.7;
                 let boyut = hucreBoyutu * kucultme;
-
                 ctx.fillStyle = s.renk;
                 for (let r = 0; r < s.matris.length; r++) {
                     for (let c = 0; c < s.matris[r].length; c++) {
                         if (s.matris[r][c] === 1) {
-                            let px = s.x + c * (boyut + 2);
-                            let py = s.y + r * (boyut + 2);
+                            let px = s.x + c * (boyut + 2); let py = s.y + r * (boyut + 2);
                             ctx.fillRect(px, py, boyut, boyut);
                         }
                     }
                 }
             });
+
+            for (let i = parcaciklar.length - 1; i >= 0; i--) {
+                let p = parcaciklar[i]; p.vy += p.yercekimi; p.x += p.vx; p.y += p.vy; p.omur -= 0.02;
+                if (p.omur <= 0) { parcaciklar.splice(i, 1); continue; }
+                ctx.fillStyle = p.renk; ctx.globalAlpha = p.omur;
+                ctx.fillRect(p.x, p.y, p.boyut, p.boyut);
+            }
+            ctx.globalAlpha = 1.0;
         }
 
         function patlamaKontrolEt() {
-            let silinecekSatirlar = [];
-            let silinecekSutunlar = [];
+            let silinecekSatirlar = []; let silinecekSutunlar = [];
 
             for (let r = 0; r < tahtaBoyutu; r++) {
                 if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r);
             }
             for (let c = 0; c < tahtaBoyutu; c++) {
                 let sutunDolu = true;
-                for (let r = 0; r < tahtaBoyutu; r++) {
-                    if (tahta[r][c] === 0) sutunDolu = false;
-                }
+                for (let r = 0; r < tahtaBoyutu; r++) { if (tahta[r][c] === 0) sutunDolu = false; }
                 if (sutunDolu) silinecekSutunlar.push(c);
             }
 
+            // Patlama tetiklendiğinde ses efektini patlat!
+            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
+                blokKırılmaSesiCal();
+            }
+
             silinecekSatirlar.forEach(r => {
-                for (let c = 0; c < tahtaBoyutu; c++) tahta[r][c] = 0;
+                for (let c = 0; c < tahtaBoyutu; c++) {
+                    let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
+                    parcalanmaEfektiYarat(x, y, tahta[r][c]); tahta[r][c] = 0;
+                }
                 skor += 10;
             });
+
             silinecekSutunlar.forEach(c => {
-                for (let r = 0; r < tahtaBoyutu; r++) tahta[r][c] = 0;
+                for (let r = 0; r < tahtaBoyutu; r++) {
+                    if (tahta[r][c] !== 0) {
+                        let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
+                        parcalanmaEfektiYarat(x, y, tahta[r][c]); tahta[r][c] = 0;
+                    }
+                }
                 skor += 10;
             });
 
@@ -193,82 +304,88 @@
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
                     if (s.matris[r][c] === 1) {
-                        let tr = hedefR + r;
-                        let tc = hedefC + c;
-                        if (tr >= tahtaBoyutu || tc >= tahtaBoyutu || tr < 0 || tc < 0 || tahta[tr][tc] !== 0) {
-                            return false;
-                        }
+                        let tr = hedefR + r; let tc = hedefC + c;
+                        if (tr >= tahtaBoyutu || tc >= tahtaBoyutu || tr < 0 || tc < 0 || tahta[tr][tc] !== 0) return false;
                     }
                 }
             }
             return true;
         }
 
+        function hamleKontrolEt() {
+            let hamleVarMi = false;
+            let aktifSecenekler = secenekler.filter(s => !s.kullanildi);
+            if (aktifSecenekler.length === 0) return;
+
+            for (let s of aktifSecenekler) {
+                for (let r = 0; r < tahtaBoyutu; r++) {
+                    for (let c = 0; c < tahtaBoyutu; c++) {
+                        if (tahtayaYerlesebilirMi(s, r, c)) { hamleVarMi = true; break; }
+                    }
+                    if (hamleVarMi) break;
+                }
+                if (hamleVarMi) break;
+            }
+
+            if (!hamleVarMi) { oyunBitti = true; document.getElementById("gameover-screen").style.display = "flex"; }
+        }
+
+        function oyunuSifirla() {
+            tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
+            skor = 0; document.getElementById('skorText').innerText = skor;
+            oyunBitti = false; parcaciklar = []; izParcaciklari = [];
+            document.getElementById("gameover-screen").style.display = "none";
+            yeniParcalariUret();
+            ekranCiz();
+        }
+
         canvas.addEventListener('mousedown', (e) => {
+            sesMotorunuBaslat(); // İlk tıklamada ses sistemini tarayıcı güvenliği için uyandırıyoruz
             if (oyunBitti) return;
             let rect = canvas.getBoundingClientRect();
-            fareX = e.clientX - rect.left;
-            fareY = e.clientY - rect.top;
+            fareX = e.clientX - rect.left; fareY = e.clientY - rect.top;
 
             secenekler.forEach((s, idx) => {
                 if (s.kullanildi) return;
                 if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
-                    seciliBlokIndeks = idx;
-                    surukleniyorMu = true;
-                    ofsetX = fareX - s.x;
-                    ofsetY = fareY - s.y;
+                    seciliBlokIndeks = idx; surukleniyorMu = true;
+                    ofsetX = fareX - s.x; ofsetY = fareY - s.y;
                 }
             });
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
             let rect = canvas.getBoundingClientRect();
-            fareX = e.clientX - rect.left;
-            fareY = e.clientY - rect.top;
-
-            secenekler[seciliBlokIndeks].x = fareX - ofsetX;
-            secenekler[seciliBlokIndeks].y = fareY - ofsetY;
-            ekranCiz();
+            fareX = e.clientX - rect.left; fareY = e.clientY - rect.top;
+            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
+            secenekler[seciliBlokIndeks].x = fareX - ofsetX; secenekler[seciliBlokIndeks].y = fareY - ofsetY;
         });
 
         canvas.addEventListener('mouseup', () => {
             if (!surukleniyorMu || seciliBlokIndeks === -1) return;
             let s = secenekler[seciliBlokIndeks];
-
             let merkezIzgaraC = Math.round((s.x - tahtaOfsetX) / (hucreBoyutu + bosluk));
             let merkezIzgaraR = Math.round((s.y - tahtaOfsetY) / (hucreBoyutu + bosluk));
 
             if (tahtayaYerlesebilirMi(s, merkezIzgaraR, merkezIzgaraC)) {
                 for (let r = 0; r < s.matris.length; r++) {
                     for (let c = 0; c < s.matris[r].length; c++) {
-                        if (s.matris[r][c] === 1) {
-                            tahta[merkezIzgaraR + r][merkezIzgaraC + c] = s.renk;
-                        }
+                        if (s.matris[r][c] === 1) tahta[merkezIzgaraR + r][merkezIzgaraC + c] = s.renk;
                     }
                 }
-                s.kullanildi = true;
-                skor += 5;
+                s.kullanildi = true; skor += 5;
                 document.getElementById('skorText').innerText = skor;
                 patlamaKontrolEt();
-
-                if (secenekler.every(opt => opt.kullanildi)) yeniParcalariUret();
+                if (secenekler.every(opt => opt.kullanildi)) yeniParcalariUret(); else hamleKontrolEt();
             } else {
-                s.x = s.orjX;
-                s.y = s.orjY;
+                s.x = s.orjX; s.y = s.orjY;
             }
-
-            surukleniyorMu = false;
-            seciliBlokIndeks = -1;
-            ekranCiz();
+            surukleniyorMu = false; seciliBlokIndeks = -1;
         });
 
-        function oyunDongusu() {
-            if (!surukleniyorMu) ekranCiz();
-            requestAnimationFrame(oyunDongusu);
-        }
+        function oyunDongusu() { ekranCiz(); requestAnimationFrame(oyunDongusu); }
+        yeniParcalariUret();
         oyunDongusu();
     </script>
 </body>
 </html>
-
