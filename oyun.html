@@ -78,16 +78,17 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
+        // 🎯 1 ve 0'lar tam anlamıyla eksiksiz dolduruldu! (3x3 Küp Dahil)
         const b_sekiller = [
             [[1]], 
-            [[1,1]], 
-            [[1],[1]], 
-            [[1,1,1]], 
-            [[1,1],[1,1]], 
-            [[0,1,1],[1,1,0]], 
-            [[0,1,0],[1,1,1]], 
-            [[1,0],[1,0],[1,1]],
-            [[1,1,1],[1,1,1],[1,1,1]]
+            [[1, 1]], 
+            [[1], [1]], 
+            [[1, 1, 1]], 
+            [[1, 1], [1, 1]], 
+            [[1, 1, 0], [0, 1, 1]], 
+            [[0, 1, 0], [1, 1, 1]], 
+            [[1, 0], [1, 0], [1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
         ];
 
         let secenekler = [];
@@ -123,9 +124,7 @@
             osc.start(); osc.stop(sesCtx.currentTime + 0.3);
         }
 
-        // 🔊 YENİ RS JANTLAR TRAP MELODİ VE RİTİM MOTORU
         function arkaPlanMuzigiCal() {
-            // "Göze çarpıyo' bak fena" akılda kalıcı hip-hop nota frekansları
             const melodiNotaları =; 
             let notaIndeks = 0;
 
@@ -134,7 +133,6 @@
                 
                 let siberZaman = sesCtx.currentTime;
 
-                // 1. Trap Kick / Bass Vuruşu (Alt Ritim)
                 let kickOsc = sesCtx.createOscillator();
                 let kickGain = sesCtx.createGain();
                 kickOsc.type = 'sine';
@@ -145,22 +143,21 @@
                 kickOsc.connect(kickGain); kickGain.connect(sesCtx.destination);
                 kickOsc.start(); kickOsc.stop(siberZaman + 0.3);
 
-                // 2. RS Jantlar Ana Melodi Akışı
                 let melodiOsc = sesCtx.createOscillator();
                 let melodiGain = sesCtx.createGain();
-                melodiOsc.type = 'sawtooth'; // Sert ve keskin rap havası
+                melodiOsc.type = 'sawtooth';
                 
                 let anlıkNota = melodiNotaları[notaIndeks % melodiNotaları.length];
                 melodiOsc.frequency.setValueAtTime(anlıkNota, siberZaman);
                 
-                melodiGain.gain.setValueAtTime(0.25, siberZaman); // Ses seviyesi yükseltildi!
+                melodiGain.gain.setValueAtTime(0.25, siberZaman); 
                 melodiGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.4);
                 
                 melodiOsc.connect(melodiGain); melodiGain.connect(sesCtx.destination);
-                melodiOsc.start(); melodyOsc = melodiOsc; melodiOsc.stop(siberZaman + 0.4);
+                melodiOsc.start(); melodiOsc.stop(siberZaman + 0.4);
 
                 notaIndeks++;
-            }, 450); // Şarkının BPM temposu hızlandırıldı, tam ritim yakalandı!
+            }, 450); 
         }
 
         function parcalanmaEfektiYarat(x, y, renk) {
