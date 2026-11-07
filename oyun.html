@@ -41,14 +41,9 @@
             0% { transform: scale(1); box-shadow: 0 0 10px rgba(22, 163, 74, 0.6); }
             100% { transform: scale(1.06); box-shadow: 0 0 25px #22c55e; }
         }
-        /* YouTube müzik oynatıcısını arka planda tamamen gizliyoruz */
-        #yt-player { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
-
-    <!-- 🌐 Gizli YouTube Müzik Altyapısı (Telif ve Filtre Engelleri Kökten Çözüldü) -->
-    <iframe id="yt-player" src="https://youtube.com" allow="autoplay"></iframe>
 
     <div class="game-container" id="anaKutu">
         <div id="score-board">NOXILMC BLAST — SKOR: <span id="skorText">0</span> <span id="seviyeText" style="color:#ff9f1a; margin-left:10px;">(TEMA 1)</span></div>
@@ -80,37 +75,65 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
+        // Şekil Matrisleri Sabitlendi (3x3 Küp Dahil)
         const b_sekiller = [
-            [], [], [,], [], [,], [,], [,], [,,], [,,]
+            [[1]], 
+            [[1,1]], 
+            [[1],[1]], 
+            [[1,1,1]], 
+            [[1,1],[1,1]], 
+            [[0,1,1],[1,1,0]], 
+            [[0,1,0],[1,1,1]], 
+            [[1,0,0],[1,1,1]],
+            [[1,1,1],[1,1,1],[1,1,1]]
         ];
 
         let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
         let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
         let parcaciklar =; let izParcaciklari =; let lazerSeritleri =; 
 
-        // 🔊 Müzik oynatıcısını ilk tıkla uyandırma fonksiyonu
-        function muzigiBaslat() {
-            let iframe = document.getElementById('yt-player');
-            if (iframe) {
-                // YouTube API komutuyla videoyu gizlice oynatır
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*'); // Son Ses!
-            }
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let sesCtx = null; let muzikZamanlayici = null;
+
+        function sesMotorunuBaslat() {
+            if (!sesCtx) { sesCtx = new AudioContext(); arkaPlanMuzigiCal(); }
         }
 
-        // Blok kırılma çıtırtı efekti
         function blokKırılmaSesiCal() {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if(!AudioContext) return;
-            let sCtx = new AudioContext();
-            let osc = sCtx.createOscillator(); let gain = sCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(250 + Math.random() * 150, sCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(30, sCtx.currentTime + 0.2);
-            gain.gain.setValueAtTime(0.7, sCtx.currentTime); 
-            gain.gain.linearRampToValueAtTime(0.01, sCtx.currentTime + 0.2);
-            osc.connect(gain); gain.connect(sCtx.destination);
-            osc.start(); osc.stop(sCtx.currentTime + 0.2);
+            if (!sesCtx) return;
+            let osc = sesCtx.createOscillator(); let gain = sesCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300 + Math.random() * 200, sesCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.9, sesCtx.currentTime); 
+            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(sesCtx.destination);
+            osc.start(); osc.stop(sesCtx.currentTime + 0.3);
+        }
+
+        function arkaPlanMuzigiCal() {
+            const melodiNotaları = [293.66, 349.23, 440.00, 392.00, 349.23, 293.66, 261.63, 293.66]; 
+            let notaIndeks = 0;
+            muzikZamanlayici = setInterval(() => {
+                if (oyunBitti || !sesCtx) return;
+                let siberZaman = sesCtx.currentTime;
+                
+                let kickOsc = sesCtx.createOscillator(); let kickGain = sesCtx.createGain();
+                kickOsc.type = 'sine'; kickOsc.frequency.setValueAtTime(90, siberZaman);
+                kickOsc.frequency.exponentialRampToValueAtTime(0.01, siberZaman + 0.25);
+                kickGain.gain.setValueAtTime(0.5, siberZaman); kickGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.25);
+                kickOsc.connect(kickGain); kickGain.connect(sesCtx.destination);
+                kickOsc.start(); kickOsc.stop(siberZaman + 0.25);
+
+                let melodiOsc = sesCtx.createOscillator(); let melodiGain = sesCtx.createGain();
+                melodiOsc.type = 'sawtooth';
+                let anlıkNota = melodiNotaları[notaIndeks % melodiNotaları.length];
+                melodiOsc.frequency.setValueAtTime(anlıkNota, siberZaman);
+                melodiGain.gain.setValueAtTime(0.28, siberZaman); melodiGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.4);
+                melodiOsc.connect(melodiGain); melodiGain.connect(sesCtx.destination);
+                melodiOsc.start(); melodiOsc.stop(siberZaman + 0.4);
+                notaIndeks++;
+            }, 450); 
         }
 
         function parcalanmaEfektiYarat(x, y, renk) {
@@ -124,7 +147,7 @@
         }
 
         function yeniParcalariUret() {
-            secenekler =; let p = temalar[aktifTemaId].palet;
+            secenekler = []; let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
                 let rastgeleRenk = p[Math.floor(Math.random() * p.length)];
