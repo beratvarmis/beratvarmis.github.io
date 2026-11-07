@@ -3,86 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - Block Blast Master Premium</title>
+    <title>NoxilMC - Block Blast Master Cyber Evolution</title>
     <style>
         html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #0b0f19;
+            margin: 0; padding: 0; overflow: hidden;
+            background-color: #05070f;
             font-family: 'Segoe UI', system-ui, sans-serif;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            transition: background-color 1s ease;
         }
         .game-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #151d30;
-            padding: 15px;
-            border-radius: 20px;
-            border: 3px solid #1f2c47;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+            position: relative; display: flex; flex-direction: column; align-items: center;
+            background: #111827; padding: 15px; border-radius: 20px;
+            border: 3px solid #1f2937; box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+            transition: all 1s ease;
         }
         #score-board {
-            color: #00f0ff;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            text-shadow: 0 0 10px rgba(0,240,255,0.4);
+            color: #00f0ff; font-size: 22px; font-weight: bold; margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(0,240,255,0.5);
         }
-        canvas {
-            background-color: #0b0f19;
-            border-radius: 12px;
-            cursor: pointer;
-        }
+        canvas { background-color: #05070f; border-radius: 12px; cursor: pointer; transition: background-color 1s ease; }
         #gameover-screen {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 15, 25, 0.95);
-            border-radius: 20px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ff3366;
-            font-size: 32px;
-            font-weight: bold;
-            text-shadow: 0 0 15px #ff3366;
-            z-index: 100;
-            text-align: center;
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 15, 0.95); border-radius: 20px;
+            flex-direction: column; justify-content: center; align-items: center;
+            color: #ff3366; font-size: 32px; font-weight: bold; text-shadow: 0 0 15px #ff3366; z-index: 100;
         }
         .restart-btn {
-            margin-top: 20px;
-            background-color: #238636;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            animation: butonNabiz 1s infinite alternate;
-            transition: 0.2s;
+            margin-top: 20px; background-color: #16a34a; color: white; border: none;
+            padding: 12px 30px; font-size: 18px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; animation: butonNabiz 1s infinite alternate; transition: 0.2s;
         }
         @keyframes butonNabiz {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(35, 134, 54, 0.6); }
-            100% { transform: scale(1.06); box-shadow: 0 0 25px #2ea043; }
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(22, 163, 74, 0.6); }
+            100% { transform: scale(1.06); box-shadow: 0 0 25px #22c55e; }
         }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <div id="score-board">NOXILMC BLAST — SKOR: <span id="skorText">0</span></div>
+    <div class="game-container" id="anaKutu">
+        <div id="score-board">NOXILMC BLAST — SKOR: <span id="skorText">0</span> <span id="seviyeText" style="color:#ff9f1a; margin-left:10px;">(TEMA 1)</span></div>
         <canvas id="gameCanvas" width="410" height="580"></canvas>
         
-        <div id="gameover-screen">
-            <span id="failReason">YER KALMADI!</span><br>
+        <div id="gameover-screen" id="gameoverBox">
+            <span>YER KALMADI!</span><br>
             <button class="restart-btn" onclick="oyunuSifirla()">Tekrar Dene</button>
         </div>
     </div>
@@ -99,32 +65,31 @@
 
         let skor = 0;
         let oyunBitti = false;
+        let aktifTemaId = 0;
 
         let tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
-        const renkPaleti = ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'];
-
-        // Tüm Blok Kombinasyonları Sabitlendi
-        const b_sekiller = [
-            [[1]], 
-            [[1, 1]], 
-            [[1], [1]], 
-            [[1, 1, 1]], 
-            [[1, 1], [1, 1]], 
-            [[0, 1, 1], [1, 1, 0]], 
-            [[1, 1, 1], [0, 1, 0]], 
-            [[1, 0], [1, 0], [1, 1]],
-            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
+        
+        // 🌟 EVRİM GEÇİREN RENK TEMALARI (Her 1000 Puanda Değişir)
+        const temalar = [
+            { bg: '#05070f', kutu: '#111827', sınır: '#1f2937', palet: ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'] },
+            { bg: '#0f051d', kutu: '#1a0b2e', sınır: '#3b1466', palet: ['#ff00ff', '#9900ff', '#ff0055', '#00ffff', '#ffcc00', '#ff3333'] },
+            { bg: '#020d0f', kutu: '#052226', sınır: '#0a4750', palet: ['#00ffcc', '#00ff66', '#33ccff', '#ffff00', '#ff6600', '#00ff00'] },
+            { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
-        let secenekler = [];
+        const b_sekiller = [
+            [], [], [,], [], [,], [,], [,], [,,], [,,]
+        ];
+
+        let secenekler =;
         let seciliBlokIndeks = -1;
         let surukleniyorMu = false;
         let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
 
-        let parcaciklar = [];
-        let izParcaciklari = [];
+        let parcaciklar =;
+        let izParcaciklari =;
+        let lazerSeritleri =; // Aktif kırılacak şerit animasyon havuzu
 
-        // 🎵 TELİFSİZ SEYİR MÜZİĞİ VE SES SENTEZLEYİCİ ALTYAPISI
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let sesCtx = null;
         let muzikZamanlayici = null;
@@ -136,65 +101,55 @@
             }
         }
 
-        // 💥 BLOK KIRILMA PARÇALANMA SESİ (Her blok için küçük çıtırtı/patlama ses dalgası fırlatır)
+        // 🔊 SES SEVİYESİ YÜKSELTİLDİ (Gain Değeri 0.3'ten 0.8'e Çıkarıldı!)
         function blokKırılmaSesiCal() {
             if (!sesCtx) return;
             let osc = sesCtx.createOscillator();
             let gain = sesCtx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150 + Math.random() * 100, sesCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.3, sesCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.15);
-            osc.connect(gain);
-            gain.connect(sesCtx.destination);
-            osc.start();
-            osc.stop(sesCtx.currentTime + 0.15);
+            osc.frequency.setValueAtTime(200 + Math.random() * 150, sesCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, sesCtx.currentTime + 0.25);
+            gain.gain.setValueAtTime(0.8, sesCtx.currentTime); // Gür ses!
+            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.25);
+            osc.connect(gain); gain.connect(sesCtx.destination);
+            osc.start(); osc.stop(sesCtx.currentTime + 0.25);
         }
 
-        // 🎹 SAKİN VE HUZURLU LOFI FON MÜZİĞİ (Arka arkaya tatlı piyano notaları dizer)
+        // 🔊 FON MÜZİĞİ SESİ ARTIRILDI (0.04'ten 0.12'ye Yükseltildi!)
         function arkaPlanMuzigiCal() {
-            const notalar = [261.63, 293.66, 329.63, 392.00, 440.00]; // Sakin Chill akorlar
-            let adim = 0;
-
+            const notalar =;
             muzikZamanlayici = setInterval(() => {
                 if (oyunBitti || !sesCtx) return;
-                
-                // Arada rastgele sakin bir melodi seç
                 if (Math.random() < 0.6) {
                     let frekans = notalar[Math.floor(Math.random() * notalar.length)];
                     let osc = sesCtx.createOscillator();
                     let gain = sesCtx.createGain();
-                    
-                    osc.type = 'sine'; // En yumuşak ses dalgası
-                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime); // Lofi derinlik için kalın perdeden
-                    
-                    gain.gain.setValueAtTime(0.04, sesCtx.currentTime); // Arkada fısıltı gibi çalsın
-                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.2);
-                    
-                    osc.connect(gain);
-                    gain.connect(sesCtx.destination);
-                    osc.start();
-                    osc.stop(sesCtx.currentTime + 1.2);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime);
+                    gain.gain.setValueAtTime(0.12, sesCtx.currentTime); // Daha net müzik sesi
+                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.4);
+                    osc.connect(gain); gain.connect(sesCtx.destination);
+                    osc.start(); osc.stop(sesCtx.currentTime + 1.4);
                 }
-            }, 800); // 800 milisaniyede bir tatlı akor vuruşu
+            }, 750);
         }
 
         function parcalanmaEfektiYarat(x, y, renk) {
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 18; i++) {
                 parcaciklar.push({
                     x: x + hucreBoyutu / 2, y: y + hucreBoyutu / 2,
-                    vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 4) * 2,
-                    renk: renk, boyut: Math.random() * 4 + 2, omur: 1.0, yercekimi: 0.15
+                    vx: (Math.random() - 0.5) * 7, vy: (Math.random() - 5) * 2,
+                    renk: renk, boyut: Math.random() * 5 + 2, omur: 1.0, yercekimi: 0.18
                 });
             }
         }
 
         function yeniParcalariUret() {
-            secenekler = [];
+            secenekler =;
+            let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
-                let rastgeleRenk = renkPaleti[Math.floor(Math.random() * renkPaleti.length)];
+                let rastgeleRenk = p[Math.floor(Math.random() * p.length)];
                 secenekler.push({
                     matris: b_sekiller[rastgeleTip], renk: rastgeleRenk,
                     orjX: 20 + i * 135, orjY: 440, x: 20 + i * 135, y: 440, kullanildi: false
@@ -202,6 +157,19 @@
             }
             hamleKontrolEt();
         }
+        function temaEvrimKontrolEt() {
+            let yeniTemaId = Math.min(temalar.length - 1, Math.floor(skor / 1000));
+            if (yeniTemaId !== aktifTemaId) {
+                aktifTemaId = yeniTemaId;
+                let t = temalar[aktifTemaId];
+                document.body.style.backgroundColor = t.bg;
+                document.getElementById("canvas").style.backgroundColor = t.bg;
+                document.getElementById("anaKutu").style.backgroundColor = t.kutu;
+                document.getElementById("anaKutu").style.borderColor = t.sınır;
+                document.getElementById("seviyeText").innerText = `(TEMA ${aktifTemaId + 1})`;
+            }
+        }
+
         function ekranCiz() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -210,12 +178,12 @@
                     let x = tahtaOfsetX + c * (hucreBoyutu + bosluk);
                     let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
                     if (tahta[r][c] === 0) {
-                        ctx.fillStyle = '#1a2438';
+                        ctx.fillStyle = aktifTemaId === 0 ? '#1a2438' : aktifTemaId === 1 ? '#271242' : aktifTemaId === 2 ? '#0b353b' : '#2b2b2b';
                         ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
                     } else {
                         ctx.fillStyle = tahta[r][c];
                         ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
-                        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
                         ctx.strokeRect(x, y, hucreBoyutu, hucreBoyutu);
                     }
                 }
@@ -251,6 +219,19 @@
                 }
             });
 
+            for (let i = lazerSeritleri.length - 1; i >= 0; i--) {
+                let l = lazerSeritleri[i]; l.omur -= 0.08;
+                if (l.omur <= 0) { lazerSeritleri.splice(i, 1); continue; }
+                ctx.fillStyle = 'rgba(0, 240, 255, ' + l.omur + ')';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00f0ff';
+                if (l.tip === 'satir') {
+                    ctx.fillRect(tahtaOfsetX, l.y, tahtaBoyutu * (hucreBoyutu + bosluk), hucreBoyutu);
+                } else {
+                    ctx.fillRect(l.x, tahtaOfsetY, hucreBoyutu, tahtaBoyutu * (hucreBoyutu + bosluk));
+                }
+                ctx.shadowBlur = 0;
+            }
+
             for (let i = parcaciklar.length - 1; i >= 0; i--) {
                 let p = parcaciklar[i]; p.vy += p.yercekimi; p.x += p.vx; p.y += p.vy; p.omur -= 0.02;
                 if (p.omur <= 0) { parcaciklar.splice(i, 1); continue; }
@@ -259,10 +240,8 @@
             }
             ctx.globalAlpha = 1.0;
         }
-
         function patlamaKontrolEt() {
             let silinecekSatirlar = []; let silinecekSutunlar = [];
-
             for (let r = 0; r < tahtaBoyutu; r++) {
                 if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r);
             }
@@ -271,20 +250,24 @@
                 for (let r = 0; r < tahtaBoyutu; r++) { if (tahta[r][c] === 0) sutunDolu = false; }
                 if (sutunDolu) silinecekSutunlar.push(c);
             }
-
-            // Patlama tetiklendiğinde ses efektini patlat!
+            silinecekSatirlar.forEach(r => {
+                let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
+                lazerSeritleri.push({ tip: 'satir', y: y, omur: 1.0 });
+            });
+            silinecekSutunlar.forEach(c => {
+                let x = tahtaOfsetX + c * (hucreBoyutu + bosluk);
+                lazerSeritleri.push({ tip: 'sutun', x: x, omur: 1.0 });
+            });
             if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
                 blokKırılmaSesiCal();
             }
-
             silinecekSatirlar.forEach(r => {
                 for (let c = 0; c < tahtaBoyutu; c++) {
                     let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
                     parcalanmaEfektiYarat(x, y, tahta[r][c]); tahta[r][c] = 0;
                 }
-                skor += 10;
+                skor += 150;
             });
-
             silinecekSutunlar.forEach(c => {
                 for (let r = 0; r < tahtaBoyutu; r++) {
                     if (tahta[r][c] !== 0) {
@@ -292,11 +275,11 @@
                         parcalanmaEfektiYarat(x, y, tahta[r][c]); tahta[r][c] = 0;
                     }
                 }
-                skor += 10;
+                skor += 150;
             });
-
             if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
                 document.getElementById('skorText').innerText = skor;
+                temaEvrimKontrolEt();
             }
         }
 
@@ -316,7 +299,6 @@
             let hamleVarMi = false;
             let aktifSecenekler = secenekler.filter(s => !s.kullanildi);
             if (aktifSecenekler.length === 0) return;
-
             for (let s of aktifSecenekler) {
                 for (let r = 0; r < tahtaBoyutu; r++) {
                     for (let c = 0; c < tahtaBoyutu; c++) {
@@ -326,25 +308,22 @@
                 }
                 if (hamleVarMi) break;
             }
-
             if (!hamleVarMi) { oyunBitti = true; document.getElementById("gameover-screen").style.display = "flex"; }
         }
 
         function oyunuSifirla() {
             tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
             skor = 0; document.getElementById('skorText').innerText = skor;
-            oyunBitti = false; parcaciklar = []; izParcaciklari = [];
+            oyunBitti = false; parcaciklar = []; izParcaciklari = []; lazerSeritleri = [];
             document.getElementById("gameover-screen").style.display = "none";
-            yeniParcalariUret();
-            ekranCiz();
+            temaEvrimKontrolEt(); yeniParcalariUret(); ekranCiz();
         }
 
         canvas.addEventListener('mousedown', (e) => {
-            sesMotorunuBaslat(); // İlk tıklamada ses sistemini tarayıcı güvenliği için uyandırıyoruz
+            sesMotorunuBaslat();
             if (oyunBitti) return;
             let rect = canvas.getBoundingClientRect();
             fareX = e.clientX - rect.left; fareY = e.clientY - rect.top;
-
             secenekler.forEach((s, idx) => {
                 if (s.kullanildi) return;
                 if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
@@ -373,9 +352,10 @@
                         if (s.matris[r][c] === 1) tahta[merkezIzgaraR + r][merkezIzgaraC + c] = s.renk;
                     }
                 }
-                s.kullanildi = true; skor += 5;
+                s.kullanildi = true; skor += 50;
                 document.getElementById('skorText').innerText = skor;
                 patlamaKontrolEt();
+                temaEvrimKontrolEt();
                 if (secenekler.every(opt => opt.kullanildi)) yeniParcalariUret(); else hamleKontrolEt();
             } else {
                 s.x = s.orjX; s.y = s.orjY;
