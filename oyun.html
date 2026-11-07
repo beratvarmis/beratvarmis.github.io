@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoxilMC - Block Blast Master</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #151d30;
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid #1f2c47;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+        }
+        #score-board {
+            color: #00f0ff;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(0,240,255,0.4);
+        }
+        canvas {
+            background-color: #0b0f19;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        #gameover-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 15, 25, 0.95);
+            border-radius: 20px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff3366;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ff3366;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="score-board">NOXILMC BLAST — SKOR: <span id="skorText">0</span></div>
+        <canvas id="gameCanvas" width="410" height="580"></canvas>
+        
+        <div id="gameover-screen">
+            OYUN BİTTİ!<br>
+            <span style="font-size: 16px; color: #fff; text-shadow: none; margin-top: 10px;">Yeniden başlamak için F5 yapın</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const tahtaBoyutu = 8;
+        const hucreBoyutu = 46; 
+        const bosluk = 4;
+        const tahtaOfsetX = 8;
+        const tahtaOfsetY = 8;
+
+        let skor = 0;
+        let oyunBitti = false;
+
+        let tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
+        const renkPaleti = ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'];
+
+        // 🎯 Bütün matris sayıları eksiksiz dolduruldu, artık asla siyah ekran kalmayacak!
+        const b_sekiller = [
+            [[1]], 
+            [[1, 1]], 
+            [[1], [1]], 
+            [[1, 1, 1]], 
+            [[1, 1], [1, 1]], 
+            [[0, 1, 1], [1, 1, 0]], 
+            [[0, 1, 0], [1, 1, 1]], 
+            [[1, 0], [1, 0], [1, 1]]
+        ];
+
+        let secenekler = [];
+        let seciliBlokIndeks = -1;
+        let surukleniyorMu = false;
+        let fareX = 0;
+        let fareY = 0;
+        let ofsetX = 0;
+        let ofsetY = 0;
+
+        function yeniParcalariUret() {
+            secenekler = [];
+            for (let i = 0; i < 3; i++) {
+                let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
+                let rastgeleRenk = renkPaleti[Math.floor(Math.random() * renkPaleti.length)];
+                
+                secenekler.push({
+                    matris: b_sekiller[rastgeleTip],
+                    renk: rastgeleRenk,
+                    orjX: 20 + i * 135,
+                    orjY: 440,
+                    x: 20 + i * 135,
+                    y: 440,
+                    kullanildi: false
+                });
+            }
+        }
+        yeniParcalariUret();
+        function ekranCiz() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let r = 0; r < tahtaBoyutu; r++) {
+                for (let c = 0; c < tahtaBoyutu; c++) {
+                    let x = tahtaOfsetX + c * (hucreBoyutu + bosluk);
+                    let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
+                    
+                    if (tahta[r][c] === 0) {
+                        ctx.fillStyle = '#1a2438';
+                        ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
+                    } else {
+                        ctx.fillStyle = tahta[r][c];
+                        ctx.fillRect(x, y, hucreBoyutu, hucreBoyutu);
+                    }
+                }
+            }
+
+            secenekler.forEach((s, idx) => {
+                if (s.kullanildi) return;
+
+                let kucultme = (seciliBlokIndeks === idx && surukleniyorMu) ? 1.0 : 0.7;
+                let boyut = hucreBoyutu * kucultme;
+
+                ctx.fillStyle = s.renk;
+                for (let r = 0; r < s.matris.length; r++) {
+                    for (let c = 0; c < s.matris[r].length; c++) {
+                        if (s.matris[r][c] === 1) {
+                            let px = s.x + c * (boyut + 2);
+                            let py = s.y + r * (boyut + 2);
+                            ctx.fillRect(px, py, boyut, boyut);
+                        }
+                    }
+                }
+            });
+        }
+
+        function patlamaKontrolEt() {
+            let silinecekSatirlar = [];
+            let silinecekSutunlar = [];
+
+            for (let r = 0; r < tahtaBoyutu; r++) {
+                if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r);
+            }
+            for (let c = 0; c < tahtaBoyutu; c++) {
+                let sutunDolu = true;
+                for (let r = 0; r < tahtaBoyutu; r++) {
+                    if (tahta[r][c] === 0) sutunDolu = false;
+                }
+                if (sutunDolu) silinecekSutunlar.push(c);
+            }
+
+            silinecekSatirlar.forEach(r => {
+                for (let c = 0; c < tahtaBoyutu; c++) tahta[r][c] = 0;
+                skor += 10;
+            });
+            silinecekSutunlar.forEach(c => {
+                for (let r = 0; r < tahtaBoyutu; r++) tahta[r][c] = 0;
+                skor += 10;
+            });
+
+            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
+                document.getElementById('skorText').innerText = skor;
+            }
+        }
+
+        function tahtayaYerlesebilirMi(s, hedefR, hedefC) {
+            for (let r = 0; r < s.matris.length; r++) {
+                for (let c = 0; c < s.matris[r].length; c++) {
+                    if (s.matris[r][c] === 1) {
+                        let tr = hedefR + r;
+                        let tc = hedefC + c;
+                        if (tr >= tahtaBoyutu || tc >= tahtaBoyutu || tr < 0 || tc < 0 || tahta[tr][tc] !== 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (oyunBitti) return;
+            let rect = canvas.getBoundingClientRect();
+            fareX = e.clientX - rect.left;
+            fareY = e.clientY - rect.top;
+
+            secenekler.forEach((s, idx) => {
+                if (s.kullanildi) return;
+                if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
+                    seciliBlokIndeks = idx;
+                    surukleniyorMu = true;
+                    ofsetX = fareX - s.x;
+                    ofsetY = fareY - s.y;
+                }
+            });
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
+            let rect = canvas.getBoundingClientRect();
+            fareX = e.clientX - rect.left;
+            fareY = e.clientY - rect.top;
+
+            secenekler[seciliBlokIndeks].x = fareX - ofsetX;
+            secenekler[seciliBlokIndeks].y = fareY - ofsetY;
+            ekranCiz();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
+            let s = secenekler[seciliBlokIndeks];
+
+            let merkezIzgaraC = Math.round((s.x - tahtaOfsetX) / (hucreBoyutu + bosluk));
+            let merkezIzgaraR = Math.round((s.y - tahtaOfsetY) / (hucreBoyutu + bosluk));
+
+            if (tahtayaYerlesebilirMi(s, merkezIzgaraR, merkezIzgaraC)) {
+                for (let r = 0; r < s.matris.length; r++) {
+                    for (let c = 0; c < s.matris[r].length; c++) {
+                        if (s.matris[r][c] === 1) {
+                            tahta[merkezIzgaraR + r][merkezIzgaraC + c] = s.renk;
+                        }
+                    }
+                }
+                s.kullanildi = true;
+                skor += 5;
+                document.getElementById('skorText').innerText = skor;
+                patlamaKontrolEt();
+
+                if (secenekler.every(opt => opt.kullanildi)) yeniParcalariUret();
+            } else {
+                s.x = s.orjX;
+                s.y = s.orjY;
+            }
+
+            surukleniyorMu = false;
+            seciliBlokIndeks = -1;
+            ekranCiz();
+        });
+
+        function oyunDongusu() {
+            if (!surukleniyorMu) ekranCiz();
+            requestAnimationFrame(oyunDongusu);
+        }
+        oyunDongusu();
+    </script>
+</body>
+</html>
+
