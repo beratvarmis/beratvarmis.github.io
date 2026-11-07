@@ -127,7 +127,7 @@
     </div>
 
     <script>
-        // 🔑 API Şifren tam kodun merkezine hatasız yerleştirildi!
+        // Sürüm ve şifre yapısı tamamen sabitlendi
         const GEMINI_API_KEY = "AQ.Ab8RN6KIPaK3I-X1E3RIF6riOSG88rT3CnnQlxPqC6RumUPD1A";
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -168,10 +168,10 @@
             logEkle(mesajMetni, "user-message");
             girdi.value = "";
 
-            let yukleniyorId = logEkle("🤔 Gemini AI düşünüyor ve çözüyor...", "ai-message");
+            let yukleniyorId = logEkle("🤔 Gemini AI düşünüyor... ", "ai-message");
 
             try {
-                // 🌐 Resmi tam URL adresi eksiksiz olarak buraya bağlandı!
+                // 🌐 Resmi tam internet adresi eksiksiz olarak buraya düzeltilerek eklendi!
                 let url = `https://googleapis.com{GEMINI_API_KEY}`;
                 
                 let sistem_talimati = "Sen NoxilMC kanalının yapay zekasısın. Son derece samimi, dürüst, lafı uzatmayan ama her soruya ve ödeve tam doğru cevap veren akıllı bir dostsun. Asla resmi konuşma. Eğer adını veya kim olduğunu sorarlarsa Berat'ın kurduğu Void Game Labs stüdyosunda tamamen Berat tarafından sıfırdan geliştirildiğini söyleyeceksin.";
@@ -188,7 +188,7 @@
                 let veri = await response.json();
                 let aiCevap = veri.candidates[0].content.parts[0].text;
 
-                // Ekrandaki çirkin yıldız işaretlerini siliyoruz
+                // Ekrandaki yıldızları siliyoruz
                 aiCevap = aiCevap.replace(/\*/g, "");
 
                 yukleniyorId.innerHTML = aiCevap;
@@ -196,7 +196,7 @@
 
             } catch (hata) {
                 console.error(hata);
-                let yedekCevap = "Şu an Google sunucularına bir istek gönderilemedi. Lütfen internet bağlantını veya API Key geçerliliğini kontrol et kanka!";
+                let yedekCevap = "Şu an bağlantı kurulamadı. Lütfen internet bağlantısını kontrol et veya sayfayı bir kez yenileyip tekrar dene dostum!";
                 yukleniyorId.innerHTML = yedekCevap;
                 sesliOku(yedekCevap);
             }
