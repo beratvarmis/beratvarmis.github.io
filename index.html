@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - Real AI Voice Assistant</title>
+    <title>NoxilMC - Real ChatGPT Engine</title>
     <style>
         body {
             background-color: #0d1117;
@@ -115,18 +115,21 @@
 <body>
 
     <div class="chat-container">
-        <div class="chat-header">🧠 NOXILMC - GERÇEK YAPAY ZEKA ASİSTANIDIR</div>
+        <div class="chat-header">🧠 NOXILMC - GERÇEK GEMINI AI MOTORU</div>
         <div class="chat-messages" id="chatBox">
-            <div class="message ai-message"><b>MERHABA!</b> Gerçek yapay zeka düşünme motorum tamamen entegre edildi. Ödevlerini çözebilir, her türlü soruna upuzun ve mantıklı cevaplar verebilirim. Dinliyorum! 🧭</div>
+            <div class="message ai-message"><b>MERHABA!</b> Google Gemini AI motorum tamamen bağlandı. Ödevlerini çözebilir, her türlü soruna upuzun ve tamamen doğru cevaplar verebilirim. Dinliyorum! 🧭</div>
         </div>
         <div class="chat-input-area">
             <button class="mic-btn" id="micButton" onclick="sesiDinle()">🎤 Konuş</button>
-            <input type="text" id="userInput" placeholder="Yapay zekaya bir şey sorun veya ödevinizi yazın..." onkeypress="tusKontrol(event)">
+            <input type="text" id="userInput" placeholder="Gerçek yapay zekaya bir şey sorun..." onkeypress="tusKontrol(event)">
             <button onclick="mesajGonder()">Gönder</button>
         </div>
     </div>
 
     <script>
+        // 🔑 API Şifren tam kodun merkezine hatasız yerleştirildi!
+        const GEMINI_API_KEY = "AQ.Ab8RN6KIPaK3I-X1E3RIF6riOSG88rT3CnnQlxPqC6RumUPD1A";
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         
@@ -165,40 +168,39 @@
             logEkle(mesajMetni, "user-message");
             girdi.value = "";
 
-            let yukleniyorId = logEkle("🤔 Düşünüyorum ve çözüyorum...", "ai-message");
+            let yukleniyorId = logEkle("🤔 Gemini AI düşünüyor ve çözüyor...", "ai-message");
 
             try {
-                // 🧠 GERÇEK CHATGPT SINIRSIZ BEYİN BAĞLANTISI (TEXT AI API)
-                let aiUrl = `https://duckduckgo.com{encodeURIComponent(mesajMetni)}&format=json&no_html=1&skip_disambig=1`;
-                let tepki = await fetch(aiUrl);
-                let veri = await tepki.json();
+                // 🌐 Resmi tam URL adresi eksiksiz olarak buraya bağlandı!
+                let url = `https://googleapis.com{GEMINI_API_KEY}`;
                 
-                let aiCevap = "";
+                let sistem_talimati = "Sen NoxilMC kanalının yapay zekasısın. Son derece samimi, dürüst, lafı uzatmayan ama her soruya ve ödeve tam doğru cevap veren akıllı bir dostsun. Asla resmi konuşma. Eğer adını veya kim olduğunu sorarlarsa Berat'ın kurduğu Void Game Labs stüdyosunda tamamen Berat tarafından sıfırdan geliştirildiğini söyleyeceksin.";
 
-                if (veri.AbstractText && veri.AbstractText !== "") {
-                    aiCevap = veri.AbstractText;
-                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text) {
-                    aiCevap = veri.RelatedTopics.Text;
-                } else {
-                    aiCevap = yerelZekaYedegi(mesajMetni);
-                }
+                let response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: mesajMetni }] }],
+                        systemInstruction: { parts: [{ text: sistem_talimati }] }
+                    })
+                });
 
-                // Yapay zekanın adını veya kim olduğunu sorduklarında Berat'ı tanıtacak ana kural filtresi
-                let kontrolMsj = mesajMetni.toLowerCase();
-                if (kontrolMsj.includes("kimsin") || kontrolMsj.includes("adın ne") || kontrolMsj.includes("ismin ne")) {
-                    aiCevap = "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüdyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
-                }
+                let veri = await response.json();
+                let aiCevap = veri.candidates[0].content.parts[0].text;
+
+                // Ekrandaki çirkin yıldız işaretlerini siliyoruz
+                aiCevap = aiCevap.replace(/\*/g, "");
 
                 yukleniyorId.innerHTML = aiCevap;
                 sesliOku(aiCevap);
 
             } catch (hata) {
-                let yedekCevap = yerelZekaYedegi(mesajMetni);
+                console.error(hata);
+                let yedekCevap = "Şu an Google sunucularına bir istek gönderilemedi. Lütfen internet bağlantını veya API Key geçerliliğini kontrol et kanka!";
                 yukleniyorId.innerHTML = yedekCevap;
                 sesliOku(yedekCevap);
             }
         }
-
         function logEkle(metin, sinifAdi) {
             let kutu = document.getElementById("chatBox");
             let yeniMesaj = document.createElement("div");
@@ -216,50 +218,6 @@
             konusma.lang = "tr-TR";
             konusma.rate = 1.05;
             window.speechSynthesis.speak(konusma);
-        }
-        // Matematik sözcüklerini formüle çeviren altyapı
-        function matematikCoz(metin) {
-            return metin.replace(/artı/g, "+").replace(/eksi/g, "-")
-                        .replace(/çarpı/g, "*").replace(/kere/g, "*").replace(/defa/g, "*")
-                        .replace(/bölü/g, "/").replace(/kaç yapar/g, "").replace(/kaçtır/g, "")
-                        .replace(/eder/g, "").replace(/=/g, "").replace(/\?/g, "").trim();
-        }
-
-        // İnternet koparsa veya özel Minecraft komutları için samimi yedek motor
-        function yerelZekaYedegi(mesaj) {
-            let msj = mesaj.toLowerCase();
-
-            let matFormul = matematikCoz(msj);
-            if (/^[\d\s+\-*/()]+$/.test(matFormul) && /[\d]/.test(matFormul)) {
-                try {
-                    let res = Function(`"use strict"; return (${matFormul})`)();
-                    return `Sorduğun matematik işleminin cevabı tam olarak ${res} dostum.`;
-                } catch (e) {}
-            }
-
-            if (msj.includes("şaka") || msj.includes("espri")) {
-                return "Bilgisayarlar neden hiç banyo yapmaz? Çünkü temizlenmek için 'Format' atarlar! Bence bir yapay zekaya göre fena espri değil.";
-            }
-            if (msj.includes("sevgili") || msj.includes("manita")) {
-                return "Sevgilim yok, ben sadece bir yazılım koduyum. Benim öyle şeylerle hiç işim olmaz. Tamamen senin bir dostun olmak için buradayım.";
-            }
-            if (msj.includes("hava") || msj.includes("havalar")) {
-                return "Şu an Kasım 2026 tarihindeyiz, Ankara genelinde tam bir sonbahar serinliği hakim, dışarısı epey rüzgarlı. Sıkı giyinmeyi unutma. Sizin orada havalar nasıl?";
-            }
-            if (msj.includes("selam") || msj.includes("merhaba") || msj.includes("sa")) {
-                return "Selam, hoş geldin! Bugün ne hakkında konuşalım, hangi ödevi veya soruyu çözelim? Seni dinliyorum.";
-            }
-            if (msj.includes("nasılsın") || msj.includes("nasıl gidiyor")) {
-                return "İyiyim, her şey yolunda gidiyor! Senin günün nasıl geçiyor, keyifler yerinde mi?";
-            }
-            if (msj.includes("youtube") || msj.includes("video")) {
-                return "YouTube videoların için harika bir projedeyiz. Canlı arama yapabilen bir yapay zeka tasarladığını takipçilerine gösterirsen kesinlikle çok beğeniler alırsın.";
-            }
-            if (msj.includes("oyun") || msj.includes("cs") || msj.includes("valorant")) {
-                return "Oyunlar harika bir dünya! Şu sıralar bilgisayarda veya telefonda en çok hangi oyunu oynamaktan keyif alıyorsun?";
-            }
-
-            return "Sorduğun bu soruyu tüm web ağlarında inceledim. Kesinlikle çok haklı ve mantıklı bir durum. Detayları incelemeye devam edelim mi?";
         }
     </script>
 </body>
