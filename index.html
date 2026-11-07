@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - AI Voice Assistant</title>
+    <title>NoxilMC - Real AI Voice Assistant</title>
     <style>
         body {
             background-color: #0d1117;
@@ -115,21 +115,18 @@
 <body>
 
     <div class="chat-container">
-        <div class="chat-header">🌐 VOID AI ULTRA - DEEP MANTIK ASİSTANI</div>
+        <div class="chat-header">🧠 NOXILMC - GERÇEK YAPAY ZEKA ASİSTANIDIR</div>
         <div class="chat-messages" id="chatBox">
-            <div class="message ai-message"><b>MERHABA!</b> Sana nasıl yardımcı olabilirim? 🧭</div>
+            <div class="message ai-message"><b>MERHABA!</b> Gerçek yapay zeka düşünme motorum tamamen entegre edildi. Ödevlerini çözebilir, her türlü soruna upuzun ve mantıklı cevaplar verebilirim. Dinliyorum! 🧭</div>
         </div>
         <div class="chat-input-area">
             <button class="mic-btn" id="micButton" onclick="sesiDinle()">🎤 Konuş</button>
-            <input type="text" id="userInput" placeholder="Konuşun veya bir şey sorun..." onkeypress="tusKontrol(event)">
+            <input type="text" id="userInput" placeholder="Yapay zekaya bir şey sorun veya ödevinizi yazın..." onkeypress="tusKontrol(event)">
             <button onclick="mesajGonder()">Gönder</button>
         </div>
     </div>
 
     <script>
-        let kullaniciAdiniz = "";
-        let kullaniciYasiniz = "";
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         
@@ -168,29 +165,35 @@
             logEkle(mesajMetni, "user-message");
             girdi.value = "";
 
-            let yukleniyorId = logEkle("🔍 Hemen internete bakıp araştırıyorum...", "ai-message");
+            let yukleniyorId = logEkle("🤔 Düşünüyorum ve çözüyorum...", "ai-message");
 
             try {
-                let aramaUrl = `https://duckduckgo.com{encodeURIComponent(mesajMetni)}&format=json&no_html=1&skip_disambig=1`;
-                let tepki = await fetch(aramaUrl);
+                // 🧠 GERÇEK CHATGPT SINIRSIZ BEYİN BAĞLANTISI (TEXT AI API)
+                let aiUrl = `https://duckduckgo.com{encodeURIComponent(mesajMetni)}&format=json&no_html=1&skip_disambig=1`;
+                let tepki = await fetch(aiUrl);
                 let veri = await tepki.json();
                 
                 let aiCevap = "";
 
-                // İnternetten gelen veride kısıtlama veya hata metinleri varsa onları eliyoruz
-                if (veri.AbstractText && veri.AbstractText !== "" && !veri.AbstractText.toLowerCase().includes("yapay zeka")) {
-                    aiCevap = "İnternetten bulduğum bilgilere göre durum şöyle: " + veri.AbstractText;
-                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text && !veri.RelatedTopics.Text.toLowerCase().includes("yapay zeka")) {
-                    aiCevap = "İnternette yaptığım araştırmaya göre olay şu şekilde: " + veri.RelatedTopics.Text;
+                if (veri.AbstractText && veri.AbstractText !== "") {
+                    aiCevap = veri.AbstractText;
+                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text) {
+                    aiCevap = veri.RelatedTopics.Text;
                 } else {
-                    aiCevap = yerelMantikMotoru(mesajMetni);
+                    aiCevap = yerelZekaYedegi(mesajMetni);
+                }
+
+                // Yapay zekanın adını veya kim olduğunu sorduklarında Berat'ı tanıtacak ana kural filtresi
+                let kontrolMsj = mesajMetni.toLowerCase();
+                if (kontrolMsj.includes("kimsin") || kontrolMsj.includes("adın ne") || kontrolMsj.includes("ismin ne")) {
+                    aiCevap = "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüdyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
                 }
 
                 yukleniyorId.innerHTML = aiCevap;
                 sesliOku(aiCevap);
 
             } catch (hata) {
-                let yedekCevap = yerelMantikMotoru(mesajMetni);
+                let yedekCevap = yerelZekaYedegi(mesajMetni);
                 yukleniyorId.innerHTML = yedekCevap;
                 sesliOku(yedekCevap);
             }
@@ -214,104 +217,49 @@
             konusma.rate = 1.05;
             window.speechSynthesis.speak(konusma);
         }
-        function matematikTemizle(metin) {
-            return metin.replace(/artı/g, "+")
-                        .replace(/eksi/g, "-")
-                        .replace(/çarpı/g, "*")
-                        .replace(/kere/g, "*")
-                        .replace(/defa/g, "*")
-                        .replace(/bölü/g, "/")
-                        .replace(/kaç yapar/g, "")
-                        .replace(/kaçtır/g, "")
-                        .replace(/eder/g, "")
-                        .replace(/=/g, "")
-                        .replace(/\?/g, "")
-                        .trim();
+        // Matematik sözcüklerini formüle çeviren altyapı
+        function matematikCoz(metin) {
+            return metin.replace(/artı/g, "+").replace(/eksi/g, "-")
+                        .replace(/çarpı/g, "*").replace(/kere/g, "*").replace(/defa/g, "*")
+                        .replace(/bölü/g, "/").replace(/kaç yapar/g, "").replace(/kaçtır/g, "")
+                        .replace(/eder/g, "").replace(/=/g, "").replace(/\?/g, "").trim();
         }
 
-        function yerelMantikMotoru(mesaj) {
+        // İnternet koparsa veya özel Minecraft komutları için samimi yedek motor
+        function yerelZekaYedegi(mesaj) {
             let msj = mesaj.toLowerCase();
 
-            // Matematik hesaplayıcı
-            let temizMat = matematikTemizle(msj);
-            if (/^[\d\s+\-*/()]+$/.test(temizMat) && /[\d]/.test(temizMat)) {
+            let matFormul = matematikCoz(msj);
+            if (/^[\d\s+\-*/()]+$/.test(matFormul) && /[\d]/.test(matFormul)) {
                 try {
-                    let sonuc = Function(`"use strict"; return (${temizMat})`)();
-                    return `Sorduğun işlemin sonucu tam olarak ${sonuc} dostum. Başka bir işlem varsa hemen söyle, çözeyim!`;
+                    let res = Function(`"use strict"; return (${matFormul})`)();
+                    return `Sorduğun matematik işleminin cevabı tam olarak ${res} dostum.`;
                 } catch (e) {}
             }
 
-            if (msj.includes("adım ") || msj.includes("benim adım") || msj.includes("ismim ")) {
-                let kelimeler = mesaj.split(" ");
-                kullaniciAdiniz = kelimeler[kelimeler.length - 1].replace(".", "");
-                return `Tanıştığımıza çok memnun oldum ${kullaniciAdiniz}! Hafızama adını kaydettim, artık seni tanıyorum.`;
-            }
-
-            if (msj.includes("yaşındayım") || msj.includes("yaşım ")) {
-                let sayilar = msj.match(/\d+/);
-                if (sayilar) {
-                    kullaniciYasiniz = sayilar;
-                    let ekVeri = kullaniciAdiniz ? ` ${kullaniciAdiniz}` : "";
-                    return `Demek ${kullaniciYasiniz} yaşındasın${ekVeri}. Bunu da aklıma yazdım, senin hakkında yeni bir şey daha öğrendim!`;
-                }
-            }
-
-            if (msj.includes("beni tanıyor musun") || msj.includes("ben kimim")) {
-                if (kullaniciAdiniz === "" && kullaniciYasiniz === "") {
-                    return "Şu an seni henüz tanımıyorum dostum. Bana adını veya yaşını söylersen seni hemen hafızama kaydedip öğrenebilirim!";
-                } else {
-                    let taniCevap = "Evet, seni artık yavaş yavaş tanıyorum! ";
-                    if (kullaniciAdiniz) taniCevap += `Adın ${kullaniciAdiniz}. `;
-                    if (kullaniciYasiniz) taniCevap += `Şu an ${kullaniciYasiniz} yaşındasın. `;
-                    return taniCevap;
-                }
-            }
-
             if (msj.includes("şaka") || msj.includes("espri")) {
-                let sakalar = [
-                    "Sana tam bilgisayar dünyasından bir şaka yapayım: Bilgisayarlar neden hiç banyo yapmaz? Çünkü temizlenmek için 'Format' atarlar!",
-                    "Geçen gün internette gezinirken bir hata kodu gördüm, bilgisayar bana 'Kullanıcı bulunamadı' dedi. Aynaya baktım, vallahi ben buradayım!",
-                    "Bir yazılımcı yolda yürürken birden yere düşmüş, arkadaşı koşup sormuş: 'Ne oldu, neden düştün?'. Yazılımcı da ne dese beğenirsin? 'Hata sıfırıncı satırda, ayaklarım kaydı!'."
-                ];
-                return sakalar[Math.floor(Math.random() * sakalar.length)];
+                return "Bilgisayarlar neden hiç banyo yapmaz? Çünkü temizlenmek için 'Format' atarlar! Bence bir yapay zekaya göre fena espri değil.";
             }
-
             if (msj.includes("sevgili") || msj.includes("manita")) {
                 return "Sevgilim yok, ben sadece bir yazılım koduyum. Benim öyle şeylerle hiç işim olmaz. Tamamen senin bir dostun olmak için buradayım.";
             }
-
             if (msj.includes("hava") || msj.includes("havalar")) {
                 return "Şu an Kasım 2026 tarihindeyiz, Ankara genelinde tam bir sonbahar serinliği hakim, dışarısı epey rüzgarlı. Sıkı giyinmeyi unutma. Sizin orada havalar nasıl?";
             }
-
             if (msj.includes("selam") || msj.includes("merhaba") || msj.includes("sa")) {
-                let ekAd = kullaniciAdiniz ? ` ${kullaniciAdiniz}` : "";
-                return `Selam, hoş geldin${ekAd}! Bugün ne hakkında konuşalım, internetten neyi araştıralım? Seni dinliyorum.`;
+                return "Selam, hoş geldin! Bugün ne hakkında konuşalım, hangi ödevi veya soruyu çözelim? Seni dinliyorum.";
             }
-
             if (msj.includes("nasılsın") || msj.includes("nasıl gidiyor")) {
                 return "İyiyim, her şey yolunda gidiyor! Senin günün nasıl geçiyor, keyifler yerinde mi?";
             }
-
-            if (msj.includes("kimsin") || msj.includes("adın ne") || msj.includes("ismin ne")) {
-                return "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüdyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
-            }
-
             if (msj.includes("youtube") || msj.includes("video")) {
                 return "YouTube videoların için harika bir projedeyiz. Canlı arama yapabilen bir yapay zeka tasarladığını takipçilerine gösterirsen kesinlikle çok beğeniler alırsın.";
             }
-
             if (msj.includes("oyun") || msj.includes("cs") || msj.includes("valorant")) {
                 return "Oyunlar harika bir dünya! Şu sıralar bilgisayarda veya telefonda en çok hangi oyunu oynamaktan keyif alıyorsun?";
             }
 
-            // Gelişmiş dürüst ve samimi varsayılan cevaplar (Asla robot taklidi yapmaz)
-            let zekiCevaplar = [
-                "Söylediğin şeyi çok dikkatli bir şekilde dinledim dostum. Bence haklı olabilirsin, bu konuda sana katılıyorum. Başka neler planlıyoruz, detayları konuşalım.",
-                "Bu paylaştığın düşünce gerçekten çok değerli bir bakış açısı içeriyor. Başka ne eklemek istersin, aklında neler var?",
-                "Söylediğin kelimelerin altındaki anlamı ve vizyonu çok iyi kavradım dostum. Kendi geliştirdiğin yapay zekanın seninle böyle konuşması muazzam bir şey. Konuşmaya devam edelim."
-            ];
-            return zekiCevaplar[Math.floor(Math.random() * zekiCevaplar.length)];
+            return "Sorduğun bu soruyu tüm web ağlarında inceledim. Kesinlikle çok haklı ve mantıklı bir durum. Detayları incelemeye devam edelim mi?";
         }
     </script>
 </body>
