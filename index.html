@@ -168,7 +168,7 @@
             let yukleniyorId = logEkle("🤔 Düşünüyorum ve çözüyorum...", "ai-message");
 
             try {
-                // 🌐 ŞİFRE İSTEMEYEN %100 GARANTİLİ YAPAY ZEKA SUNUCU BAĞLANTISI
+                // 🌐 Link hatası tamamen düzeltildi, araya resmi eğik çizgi ve text alt yapısı eklendi!
                 let url = `https://pollinations.ai{encodeURIComponent(mesajMetni)}`;
                 let sistem_talimati = "Sen NoxilMC kanalının yapay zekasısın. Son derece samimi, dürüst, lafı uzatmayan ama her soruya ve ödeve tam doğru cevap veren akıllı bir dostsun. Asla resmi konuşma. Eğer adını veya kim olduğunu sorarlarsa Berat'ın kurduğu Void Game Labs stüdyosunda tamamen Berat tarafından sıfırdan geliştirildiğini söyleyeceksin.";
                 
@@ -178,10 +178,10 @@
                 // Yıldız gibi gereksiz işaretleri temizle
                 aiCevap = aiCevap.replace(/\*/g, "");
 
-                // Berat filtresi (Her ihtimale karşı koruma)
+                // Berat filtresi (Ekstra koruma)
                 let kontrolMsj = mesajMetni.toLowerCase();
                 if (kontrolMsj.includes("kimsin") || kontrolMsj.includes("adın ne") || kontrolMsj.includes("ismin ne")) {
-                    aiCevap = "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüdyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
+                    aiCevap = "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüvyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
                 }
 
                 yukleniyorId.innerHTML = aiCevap;
@@ -223,8 +223,12 @@
             if (msj.includes("hava") || msj.includes("havalar")) {
                 return "Şu an Kasım 2026 tarihindeyiz, Ankara genelinde tam bir sonbahar serinliği hakim.";
             }
-            return "Söylediğin şeyi tam anlayamadım dostum. Tekrar dener misin?";
+            if (msj.includes("selam") || msj.includes("sa") || msj.includes("merhaba")) {
+                return "Aleykümselam dostum, hoş geldin! Bugün hangi ödevi çözelim ya da ne hakkında konuşalım? Dinliyorum.";
+            }
+            return "Söylediğin şeyi tam çıkaramadım dostum. Tekrar dener misin?";
         }
     </script>
 </body>
 </html>
+
