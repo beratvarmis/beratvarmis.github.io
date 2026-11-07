@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoxilMC - Block Blast Master Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NoxilMC - Block Blast RS Jantlar Edition</title>
     <style>
         html, body {
             margin: 0; padding: 0; overflow: hidden;
@@ -12,6 +12,8 @@
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             transition: background-color 1s ease;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .game-container {
             position: relative; display: flex; flex-direction: column; align-items: center;
@@ -78,14 +80,14 @@
 
         const b_sekiller = [
             [[1]], 
-            [[1, 1]], 
-            [[1], [1]], 
-            [[1, 1, 1]], 
-            [[1, 1], [1, 1]], 
-            [[0, 1, 1], [1, 1, 0]], 
-            [[0, 1, 0], [1, 1, 1]], 
-            [[1, 0, 0], [1, 0, 0], [1, 1, 1]],
-            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
+            [[1,1]], 
+            [[1],[1]], 
+            [[1,1,1]], 
+            [[1,1],[1,1]], 
+            [[0,1,1],[1,1,0]], 
+            [[0,1,0],[1,1,1]], 
+            [[1,0],[1,0],[1,1]],
+            [[1,1,1],[1,1,1],[1,1,1]]
         ];
 
         let secenekler = [];
@@ -112,31 +114,53 @@
             if (!sesCtx) return;
             let osc = sesCtx.createOscillator();
             let gain = sesCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(200 + Math.random() * 150, sesCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(30, sesCtx.currentTime + 0.25);
-            gain.gain.setValueAtTime(0.8, sesCtx.currentTime); 
-            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.25);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300 + Math.random() * 200, sesCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, sesCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.9, sesCtx.currentTime); 
+            gain.gain.linearRampToValueAtTime(0.01, sesCtx.currentTime + 0.3);
             osc.connect(gain); gain.connect(sesCtx.destination);
-            osc.start(); osc.stop(sesCtx.currentTime + 0.25);
+            osc.start(); osc.stop(sesCtx.currentTime + 0.3);
         }
 
+        // 🔊 YENİ RS JANTLAR TRAP MELODİ VE RİTİM MOTORU
         function arkaPlanMuzigiCal() {
-            const notalar = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00];
+            // "Göze çarpıyo' bak fena" akılda kalıcı hip-hop nota frekansları
+            const melodiNotaları =; 
+            let notaIndeks = 0;
+
             muzikZamanlayici = setInterval(() => {
                 if (oyunBitti || !sesCtx) return;
-                if (Math.random() < 0.6) {
-                    let frekans = notalar[Math.floor(Math.random() * notalar.length)];
-                    let osc = sesCtx.createOscillator();
-                    let gain = sesCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(frekans / 2, sesCtx.currentTime);
-                    gain.gain.setValueAtTime(0.12, sesCtx.currentTime); 
-                    gain.gain.linearRampToValueAtTime(0.001, sesCtx.currentTime + 1.4);
-                    osc.connect(gain); gain.connect(sesCtx.destination);
-                    osc.start(); osc.stop(sesCtx.currentTime + 1.4);
-                }
-            }, 750);
+                
+                let siberZaman = sesCtx.currentTime;
+
+                // 1. Trap Kick / Bass Vuruşu (Alt Ritim)
+                let kickOsc = sesCtx.createOscillator();
+                let kickGain = sesCtx.createGain();
+                kickOsc.type = 'sine';
+                kickOsc.frequency.setValueAtTime(100, siberZaman);
+                kickOsc.frequency.exponentialRampToValueAtTime(0.01, siberZaman + 0.3);
+                kickGain.gain.setValueAtTime(0.4, siberZaman);
+                kickGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.3);
+                kickOsc.connect(kickGain); kickGain.connect(sesCtx.destination);
+                kickOsc.start(); kickOsc.stop(siberZaman + 0.3);
+
+                // 2. RS Jantlar Ana Melodi Akışı
+                let melodiOsc = sesCtx.createOscillator();
+                let melodiGain = sesCtx.createGain();
+                melodiOsc.type = 'sawtooth'; // Sert ve keskin rap havası
+                
+                let anlıkNota = melodiNotaları[notaIndeks % melodiNotaları.length];
+                melodiOsc.frequency.setValueAtTime(anlıkNota, siberZaman);
+                
+                melodiGain.gain.setValueAtTime(0.25, siberZaman); // Ses seviyesi yükseltildi!
+                melodiGain.gain.linearRampToValueAtTime(0.001, siberZaman + 0.4);
+                
+                melodiOsc.connect(melodiGain); melodiGain.connect(sesCtx.destination);
+                melodiOsc.start(); melodyOsc = melodiOsc; melodiOsc.stop(siberZaman + 0.4);
+
+                notaIndeks++;
+            }, 450); // Şarkının BPM temposu hızlandırıldı, tam ritim yakalandı!
         }
 
         function parcalanmaEfektiYarat(x, y, renk) {
@@ -328,7 +352,7 @@
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
                     if (s.matris[r][c] === 1) {
-                        let tr = hedefR + r; let tc = codebase = hedefC + c;
+                        let tr = hedefR + r; let tc = hedefC + c;
                         if (tr >= tahtaBoyutu || tc >= tahtaBoyutu || tr < 0 || tc < 0 || tahta[tr][tc] !== 0) return false;
                     }
                 }
