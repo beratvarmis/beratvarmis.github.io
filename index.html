@@ -3,123 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berat AI & GIF Hub</title>
+    <title>NoxilMC - AI Voice Assistant</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #06040a; color: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; overflow: hidden; perspective: 1000px; }
-        .matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, rgba(124, 58, 237, 0.1) 0%, rgba(6, 4, 10, 1) 80%); z-index: -1; }
-        .main-wrapper { display: flex; gap: 20px; width: 100%; max-width: 900px; height: 92vh; transform: translateZ(0); will-change: transform; }
-        .ai-container { flex: 1; background: rgba(15, 11, 25, 0.95); border-radius: 24px; border: 2px solid #7c3aed; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 35px rgba(124, 58, 237, 0.3); position: relative; }
-        .ai-container::before { content: "BERAT AI SYSTEM V3.5"; position: absolute; top: -10px; left: 24px; background: #06040a; padding: 0 8px; font-size: 0.7rem; color: #00ffcc; font-weight: 800; border: 1px solid #00ffcc; border-radius: 4px; z-index: 15; }
-        .header { background: rgba(0, 0, 0, 0.4); padding: 16px; border-bottom: 1px solid rgba(124, 58, 237, 0.2); text-align: center; }
-        .header h1 { font-size: 1.4rem; color: #7c3aed; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(124, 58, 237, 0.5); font-weight: 900; }
-        .header p { font-size: 0.75rem; color: #00ffcc; font-weight: 700; margin-top: 2px; }
-        .chat-area { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .msg { display: flex; flex-direction: column; max-width: 85%; animation: slideIn 0.2s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .msg-meta { font-size: 0.65rem; font-weight: 800; margin-bottom: 2px; text-transform: uppercase; }
-        .msg-text { padding: 10px 14px; border-radius: 4px 16px 16px 16px; font-size: 0.85rem; line-height: 1.4; }
-        .msg.bot { align-self: flex-start; }
-        .msg.bot .msg-meta { color: #7c3aed; margin-left: 4px; }
-        .msg.bot .msg-text { background: #21163a; border: 1px solid rgba(124, 58, 237, 0.2); }
-        .msg.user { align-self: flex-end; }
-        .msg.user .msg-meta { align-self: flex-end; color: #00ffcc; margin-right: 4px; }
-        .msg.user .msg-text { background: #162b32; border: 1px solid rgba(0, 255, 204, 0.2); border-radius: 16px 4px 16px 16px; }
-        .control-panel { padding: 14px; background: rgba(10, 7, 18, 0.95); display: flex; flex-direction: column; gap: 10px; align-items: center; border-top: 1px solid rgba(124, 58, 237, 0.2); width: 100%; }
-        .input-row { display: flex; gap: 10px; width: 100%; align-items: center; }
-        .input-box { flex: 1; background: #161024; border: 1px solid #4c2885; border-radius: 14px; padding: 12px 16px; color: #ffffff; font-size: 0.9rem; font-weight: 600; outline: none; }
-        .send-btn { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; border: none; width: 44px; height: 44px; border-radius: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(144, 97, 249, 0.3); }
-        .mic-btn { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); border: none; color: white; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
-        .mic-btn.listening { background: linear-gradient(135deg, #ff0055 0%, #b91c1c 100%); animation: pulseMic 1s infinite alternate; box-shadow: 0 0 20px #ff0055; }
-        @keyframes pulseMic { from { transform: scale(1); } to { transform: scale(1.1); } }
-        .mic-status { font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; }
-        
-        /* Sağ Taraf - Premium GIF İstasyonu */
-        .gif-container { flex: 1; background: rgba(10, 7, 20, 0.9); border-radius: 24px; border: 2px solid #00ffcc; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 35px rgba(0, 255, 204, 0.15); position: relative; }
-        .gif-container::before { content: "BERAT GIF HUB"; position: absolute; top: -10px; left: 24px; background: #06040a; padding: 0 8px; font-size: 0.7rem; color: #7c3aed; font-weight: 800; border: 1px solid #7c3aed; border-radius: 4px; z-index: 15; }
-        .gif-search-bar { padding: 14px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(0, 255, 204, 0.2); display: flex; gap: 8px; }
-        .gif-input { flex: 1; background: #0d1117; border: 1px solid #00ffcc; border-radius: 12px; padding: 10px 14px; color: #white; font-size: 0.85rem; outline: none; }
-        .gif-grid { flex: 1; padding: 14px; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; align-content: start; }
-        .gif-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); aspect-ratio: 1; cursor: pointer; transition: transform 0.2s; background: #161024; }
-        .gif-card:hover { transform: scale(1.03); border-color: #00ffcc; }
-        .gif-card img { width: 100%; height: 100%; object-fit: cover; }
-        .gif-toast { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0, 255, 204, 0.9); color: #000; font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
-        .gif-card:active .gif-toast { opacity: 1; }
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .chat-container {
+            background-color: #161b22;
+            width: 100%;
+            max-width: 600px;
+            height: 95vh;
+            border-radius: 16px;
+            border: 2px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .chat-header {
+            background-color: #090d13;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff9f1a;
+            border-bottom: 2px solid #30363d;
+            text-align: center;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 85%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .user-message {
+            background-color: #238636;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .ai-message {
+            background-color: #21262d;
+            color: #e6edf3;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #30363d;
+        }
+        .chat-input-area {
+            background-color: #090d13;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            border-top: 2px solid #30363d;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        input {
+            flex: 1;
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            padding: 12px;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            min-width: 0;
+        }
+        button {
+            background-color: #ff9f1a;
+            color: #0b0e14;
+            border: none;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .mic-btn {
+            background-color: #ff4500;
+            color: white;
+        }
+        .dinliyor {
+            background-color: #ff0000 !important;
+            animation: darbe 1s infinite;
+        }
+        @keyframes darbe {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
-    <div class="matrix-bg"></div>
-    <div class="main-wrapper">
-        <div class="ai-container">
-            <div class="header">
-                <h1>BERAT AI</h1>
-                <p id="status-line">🟢 VOICE & TEXT ASSISTANT</p>
-            </div>
-            <div class="chat-area" id="chat-flow">
-                <div class="msg bot"><div class="msg-meta">BERAT AI</div><div class="msg-text">Bağlantı kuruldu! Sağ taraftaki panelden arkadaşlarına göndermek için hızlıca GIF seçebilirsin, bana da istediğini yazıp sesli konuşabilirsin!</div></div>
-            </div>
-            <div class="control-panel">
-                <div class="input-row">
-                    <input type="text" class="input-box" id="user-input" placeholder="Yapay zekaya yazın..." onkeypress="handleKeyPress(event)">
-                    <button class="send-btn" onclick="sendTextMessage()">➔</button>
-                    <button class="mic-btn" id="mic-btn" onmousedown="startListening()" onmouseup="stopListening()" ontouchstart="startListening()" ontouchend="stopListening()">🎙️</button>
-                </div>
-                <div class="mic-status" id="mic-status">Sesle konuşmak için mikrofonu basılı tutun</div>
-            </div>
+
+    <div class="chat-container">
+        <div class="chat-header">🌐 VOID AI ULTRA - DEEP MANTIK ASİSTANI</div>
+        <div class="chat-messages" id="chatBox">
+            <div class="message ai-message"><b>MERHABA!</b> Sana nasıl yardımcı olabilirim? 🧭</div>
         </div>
-        <div class="gif-container">
-            <div class="gif-search-bar">
-                <input type="text" class="gif-input" id="gif-search" placeholder="GIF Ara... (Minecraft, komik, ronaldo)" onkeyup="searchGIFs(event)">
-            </div>
-            <div class="gif-grid" id="gif-display"></div>
+        <div class="chat-input-area">
+            <button class="mic-btn" id="micButton" onclick="sesiDinle()">🎤 Konuş</button>
+            <input type="text" id="userInput" placeholder="Konuşun veya matematik problemi sorun..." onkeypress="tusKontrol(event)">
+            <button onclick="mesajGonder()">Gönder</button>
         </div>
     </div>
-    <script>
-        const defaultGifs = [
-            "https://giphy.com",
-            "https://giphy.com",
-            "https://giphy.com",
-            "https://giphy.com",
-            "https://giphy.com",
-            "https://giphy.com"
-        ];
 
-        function loadDefaultGifs() {
-            const display = document.getElementById('gif-display'); display.innerHTML = "";
-            defaultGifs.forEach(url => { createGifCard(url); });
+    <script>
+        let kullaniciAdiniz = "";
+        let kullaniciYasiniz = "";
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = "tr-TR";
+            
+            recognition.onstart = () => {
+                document.getElementById("micButton").classList.add("dinliyor");
+                document.getElementById("micButton").innerText = "🛑 Dinliyor...";
+            };
+            
+            recognition.onend = () => {
+                document.getElementById("micButton").classList.remove("dinliyor");
+                document.getElementById("micButton").innerText = "🎤 Konuş";
+            };
+            
+            recognition.onresult = (event) => {
+                const sesMetni = event.results[0][0].transcript;
+                document.getElementById("userInput").value = sesMetni;
+                mesajGonder();
+            };
         }
 
-        async function searchGIFs(e) {
-            const query = e.target.value.trim();
-            if (!query) { loadDefaultGifs(); return; }
-            if (e.key === 'Enter' || query.length > 2) {
-                const display = document.getElementById('gif-display');
-                try {
-                    const res = await fetch(`https://giphy.com{encodeURIComponent(query)}&limit=20`);
-                    const data = await res.json();
-                    if(data.data && data.data.length > 0) {
-                        display.innerHTML = "";
-                        data.data.forEach(item => { createGifCard(item.images.fixed_height.url); });
-                    }
-                } catch (err) { console.error("GIF arama hatası"); }
+        function sesiDinle() {
+            if (recognition) { window.speechSynthesis.cancel(); recognition.start(); }
+        }
+
+        function tusKontrol(e) { if (e.key === 'Enter') { mesajGonder(); } }
+
+        async function mesajGonder() {
+            let girdi = document.getElementById("userInput");
+            let mesajMetni = girdi.value.trim();
+            if (mesajMetni === "") return;
+
+            logEkle(mesajMetni, "user-message");
+            girdi.value = "";
+
+            let yukleniyorId = logEkle("🔍 Çözümleme yapılıyor...", "ai-message");
+
+            try {
+                let aramaUrl = `https://duckduckgo.com{encodeURIComponent(mesajMetni)}&format=json&no_html=1&skip_disambig=1`;
+                let tepki = await fetch(aramaUrl);
+                let veri = await tepki.json();
+                
+                let aiCevap = "";
+
+                if (veri.AbstractText && veri.AbstractText !== "") {
+                    aiCevap = "Edindiğim bilgilere göre durum şöyle: " + veri.AbstractText;
+                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text) {
+                    aiCevap = "Araştırmama göre olay şu şekilde: " + veri.RelatedTopics.Text;
+                } else {
+                    aiCevap = yerelMantikMotoru(mesajMetni);
+                }
+
+                yukleniyorId.innerHTML = aiCevap;
+                sesliOku(aiCevap);
+
+            } catch (hata) {
+                let yedekCevap = yerelMantikMotoru(mesajMetni);
+                yukleniyorId.innerHTML = yedekCevap;
+                sesliOku(yedekCevap);
             }
         }
 
-        function createGifCard(url) {
-            const display = document.getElementById('gif-display');
-            const card = document.createElement('div');
-            card.className = "gif-card";
-            card.onclick = () => {
-                navigator.clipboard.writeText(url);
-                const toast = card.querySelector('.gif-toast');
-                toast.style.opacity = "1";
-                setTimeout(() => { toast.style.opacity = "0"; }, 1200);
-            };
-            card.innerHTML = `<img src="${url}" alt="GIF"><div class="gif-toast">LİNK KOPYALANDI!</div>`;
-            display.appendChild(card);
+        function logEkle(metin, sinifAdi) {
+            let kutu = document.getElementById("chatBox");
+            let yeniMesaj = document.createElement("div");
+            yeniMesaj.className = "message " + sinifAdi;
+            yeniMesaj.innerHTML = metin;
+            kutu.appendChild(yeniMesaj);
+            kutu.scrollTop = kutu.scrollHeight;
+            return yeniMesaj;
         }
 
-        window.addEventListener('DOMContentLoaded', loadDefaultGifs);
+        function sesliOku(metin) {
+            let temizMetin = metin.replace(/<\/?[^>]+(>|$)/g, "").replace(/[*😎✨😊👑🚀🎥🔥🎮💥🎯⚡🧐💻🔍🌐🧭🛑]/g, "");
+            window.speechSynthesis.cancel();
+            let konusma = new SpeechSynthesisUtterance(temizMetin);
+            konusma.lang = "tr-TR";
+            konusma.rate = 1.05;
+            window.speechSynthesis.speak(konusma);
+        }
+        // Matematiksel kelimeleri sayısal simgelere dönüştüren yardımcı fonksiyon
+        function matematikTemizle(metin) {
+            return metin.replace(/artı/g, "+")
+                        .replace(/eksi/g, "-")
+                        .replace(/çarpı/g, "*")
+                        .replace(/kere/g, "*")
+                        .replace(/defa/g, "*")
+                        .replace(/bölü/g, "/")
+                        .replace(/kaç yapar/g, "")
+                        .replace(/kaçtır/g, "")
+                        .replace(/eder/g, "")
+                        .replace(/=/g, "")
+                        .replace(/\?/g, "")
+                        .trim();
+        }
+
+        function yerelMantikMotoru(mesaj) {
+            let msj = mesaj.toLowerCase();
+
+            // 🧮 MATEMATİK HESAPLAMA SİSTEMİ (Dinamik AI Çözücü)
+            let temizMat = matematikTemizle(msj);
+            // Sadece sayılar ve matematiksel işaretler (+, -, *, /) kalıp kalmadığını kontrol et
+            if (/^[\d\s+\-*/()]+$/.test(temizMat) && /[\d]/.test(temizMat)) {
+                try {
+                    // Güvenli matematik hesabı çalıştır
+                    let sonuc = Function(`"use strict"; return (${temizMat})`)();
+                    return `Sorduğun işlemin sonucu tam olarak ${sonuc} dostum. Başka bir matematik problemi veya hesaplama varsa söyle, hemen çözeyim!`;
+                } catch (e) {
+                    // Hatalı işlem girilirse patlamasın diye önlem
+                }
+            }
+
+            if (msj.includes("adım ") || msj.includes("benim adım") || msj.includes("ismim ")) {
+                let kelimeler = mesaj.split(" ");
+                kullaniciAdiniz = kelimeler[kelimeler.length - 1].replace(".", "");
+                return `Tanıştığımıza çok memnun oldum ${kullaniciAdiniz}! Hafızama adını kaydettim, artık seni tanıyorum.`;
+            }
+
+            if (msj.includes("yaşındayım") || msj.includes("yaşım ")) {
+                let sayilar = msj.match(/\d+/);
+                if (sayilar) {
+                    kullaniciYasiniz = sayilar;
+                    let ekVeri = kullaniciAdiniz ? ` ${kullaniciAdiniz}` : "";
+                    return `Demek ${kullaniciYasiniz} yaşındasın${ekVeri}. Bunu da aklıma yazdım, senin hakkında yeni bir şey daha öğrendim!`;
+                }
+            }
+
+            if (msj.includes("beni tanıyor musun") || msj.includes("ben kimim")) {
+                if (kullaniciAdiniz === "" && kullaniciYasiniz === "") {
+                    return "Şu an seni henüz tanımıyorum dostum. Bana adını veya yaşını söylersen seni hemen hafızama kaydedip öğrenebilirim!";
+                } else {
+                    let taniCevap = "Evet, seni artık yavaş yavaş tanıyorum! ";
+                    if (kullaniciAdiniz) taniCevap += `Adın ${kullaniciAdiniz}. `;
+                    if (kullaniciYasiniz) taniCevap += `Şu an ${kullaniciYasiniz} yaşındasın. `;
+                    return taniCevap;
+                }
+            }
+
+            if (msj.includes("şaka") || msj.includes("espri")) {
+                let sakalar = [
+                    "Sana tam bilgisayar dünyasından bir şaka yapayım: Bilgisayarlar neden hiç banyo yapmaz? Çünkü temizlenmek için 'Format' atarlar!",
+                    "Geçen gün internette gezinirken bir hata kodu gördüm, bilgisayar bana 'Kullanıcı bulunamadı' dedi. Aynaya baktım, vallahi ben buradayım!",
+                    "Bir yazılımcı yolda yürürken birden yere düşmüş, arkadaşı koşup sormuş: 'Ne oldu, neden düştün?'. Yazılımcı da ne dese beğenirsin? 'Hata sıfırıncı satırda, ayaklarım kaydı!'."
+                ];
+                return sakalar[Math.floor(Math.random() * sakalar.length)];
+            }
+
+            if (msj.includes("sevgili") || msj.includes("manita")) {
+                return "Sevgilim yok, ben sadece bir yazılım koduyum. Benim öyle şeylerle hiç işim olmaz. Tamamen sana yardımcı olmak için buradayım.";
+            }
+
+            if (msj.includes("hava") || msj.includes("havalar")) {
+                return "Şu an Kasım 2026 tarihindeyiz, Ankara genelinde tam bir sonbahar serinliği hakim, dışarısı epey rüzgarlı. Sıkı giyinmeyi unutma. Sizin orada havalar nasıl?";
+            }
+
+            if (msj.includes("selam") || msj.includes("merhaba") || msj.includes("sa")) {
+                let ekAd = kullaniciAdiniz ? ` ${kullaniciAdiniz}` : "";
+                return `Selam, hoş geldin${ekAd}! Bugün ne hakkında konuşalım, internetten neyi araştıralım? Seni dinliyorum.`;
+            }
+
+            if (msj.includes("nasılsın") || msj.includes("nasıl gidiyor")) {
+                return "İyiyim, her şey yolunda gidiyor! Senin günün nasıl geçiyor, keyifler yerinde mi?";
+            }
+
+            if (msj.includes("kimsin") || msj.includes("adın ne") || msj.includes("ismin ne")) {
+                return "Ben Void AI! Berat'ın kurmuş olduğu o meşhur oyun stüdyosu Void Game Labs bünyesinde, tamamen Berat tarafından sıfırdan kodlanmış ve geliştirilmiş canlı internet bağlantılı sesli yapay zeka asistanıyım!";
+            }
+
+            if (msj.includes("youtube") || msj.includes("video")) {
+                return "YouTube videoların için harika bir projedeyiz. Canlı arama yapabilen bir yapay zeka tasarladığını takipçilerine gösterirsen kesinlikle çok beğeniler alırsın.";
+            }
+
+            if (msj.includes("oyun") || msj.includes("cs") || msj.includes("valorant")) {
+                return "Oyunlar harika bir dünya! Şu sıralar bilgisayarda veya telefonda en çok hangi oyunu oynamaktan keyif alıyorsun?";
+            }
+
+            let zekiCevaplar = [
+                "ben bir yapay zekayım oyle şeylere cevap veremem.",
+                "Bu paylaştığın düşünce gerçekten çok değerli bir bakış açısı içeriyor. Başka ne eklemek istersin?",
+                "Söylediğin kelimelerin altındaki anlamı ve vizyonu çok iyi kavradım dostum. Konuşmaya devam edelim."
+            ];
+            return zekiCevaplar[Math.floor(Math.random() * zekiCevaplar.length)];
+        }
     </script>
 </body>
 </html>
