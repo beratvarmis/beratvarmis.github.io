@@ -121,7 +121,7 @@
         </div>
         <div class="chat-input-area">
             <button class="mic-btn" id="micButton" onclick="sesiDinle()">🎤 Konuş</button>
-            <input type="text" id="userInput" placeholder="Konuşun veya matematik problemi sorun..." onkeypress="tusKontrol(event)">
+            <input type="text" id="userInput" placeholder="Konuşun veya bir şey sorun..." onkeypress="tusKontrol(event)">
             <button onclick="mesajGonder()">Gönder</button>
         </div>
     </div>
@@ -148,7 +148,7 @@
             };
             
             recognition.onresult = (event) => {
-                const sesMetni = event.results[0][0].transcript;
+                const sesMetni = event.results.transcript;
                 document.getElementById("userInput").value = sesMetni;
                 mesajGonder();
             };
@@ -168,7 +168,7 @@
             logEkle(mesajMetni, "user-message");
             girdi.value = "";
 
-            let yukleniyorId = logEkle("🔍 Çözümleme yapılıyor...", "ai-message");
+            let yukleniyorId = logEkle("🔍 Hemen internete bakıp araştırıyorum...", "ai-message");
 
             try {
                 let aramaUrl = `https://duckduckgo.com{encodeURIComponent(mesajMetni)}&format=json&no_html=1&skip_disambig=1`;
@@ -177,10 +177,11 @@
                 
                 let aiCevap = "";
 
-                if (veri.AbstractText && veri.AbstractText !== "") {
-                    aiCevap = "Edindiğim bilgilere göre durum şöyle: " + veri.AbstractText;
-                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text) {
-                    aiCevap = "Araştırmama göre olay şu şekilde: " + veri.RelatedTopics.Text;
+                // İnternetten gelen veride kısıtlama veya hata metinleri varsa onları eliyoruz
+                if (veri.AbstractText && veri.AbstractText !== "" && !veri.AbstractText.toLowerCase().includes("yapay zeka")) {
+                    aiCevap = "İnternetten bulduğum bilgilere göre durum şöyle: " + veri.AbstractText;
+                } else if (veri.RelatedTopics && veri.RelatedTopics.length > 0 && veri.RelatedTopics.Text && !veri.RelatedTopics.Text.toLowerCase().includes("yapay zeka")) {
+                    aiCevap = "İnternette yaptığım araştırmaya göre olay şu şekilde: " + veri.RelatedTopics.Text;
                 } else {
                     aiCevap = yerelMantikMotoru(mesajMetni);
                 }
@@ -213,7 +214,6 @@
             konusma.rate = 1.05;
             window.speechSynthesis.speak(konusma);
         }
-        // Matematiksel kelimeleri sayısal simgelere dönüştüren yardımcı fonksiyon
         function matematikTemizle(metin) {
             return metin.replace(/artı/g, "+")
                         .replace(/eksi/g, "-")
@@ -232,17 +232,13 @@
         function yerelMantikMotoru(mesaj) {
             let msj = mesaj.toLowerCase();
 
-            // 🧮 MATEMATİK HESAPLAMA SİSTEMİ (Dinamik AI Çözücü)
+            // Matematik hesaplayıcı
             let temizMat = matematikTemizle(msj);
-            // Sadece sayılar ve matematiksel işaretler (+, -, *, /) kalıp kalmadığını kontrol et
             if (/^[\d\s+\-*/()]+$/.test(temizMat) && /[\d]/.test(temizMat)) {
                 try {
-                    // Güvenli matematik hesabı çalıştır
                     let sonuc = Function(`"use strict"; return (${temizMat})`)();
-                    return `Sorduğun işlemin sonucu tam olarak ${sonuc} dostum. Başka bir matematik problemi veya hesaplama varsa söyle, hemen çözeyim!`;
-                } catch (e) {
-                    // Hatalı işlem girilirse patlamasın diye önlem
-                }
+                    return `Sorduğun işlemin sonucu tam olarak ${sonuc} dostum. Başka bir işlem varsa hemen söyle, çözeyim!`;
+                } catch (e) {}
             }
 
             if (msj.includes("adım ") || msj.includes("benim adım") || msj.includes("ismim ")) {
@@ -281,7 +277,7 @@
             }
 
             if (msj.includes("sevgili") || msj.includes("manita")) {
-                return "Sevgilim yok, ben sadece bir yazılım koduyum. Benim öyle şeylerle hiç işim olmaz. Tamamen sana yardımcı olmak için buradayım.";
+                return "Sevgilim yok, ben sadece bir yazılım koduyum. Benim öyle şeylerle hiç işim olmaz. Tamamen senin bir dostun olmak için buradayım.";
             }
 
             if (msj.includes("hava") || msj.includes("havalar")) {
@@ -309,10 +305,11 @@
                 return "Oyunlar harika bir dünya! Şu sıralar bilgisayarda veya telefonda en çok hangi oyunu oynamaktan keyif alıyorsun?";
             }
 
+            // Gelişmiş dürüst ve samimi varsayılan cevaplar (Asla robot taklidi yapmaz)
             let zekiCevaplar = [
-                "ben bir yapay zekayım oyle şeylere cevap veremem.",
-                "Bu paylaştığın düşünce gerçekten çok değerli bir bakış açısı içeriyor. Başka ne eklemek istersin?",
-                "Söylediğin kelimelerin altındaki anlamı ve vizyonu çok iyi kavradım dostum. Konuşmaya devam edelim."
+                "Söylediğin şeyi çok dikkatli bir şekilde dinledim dostum. Bence haklı olabilirsin, bu konuda sana katılıyorum. Başka neler planlıyoruz, detayları konuşalım.",
+                "Bu paylaştığın düşünce gerçekten çok değerli bir bakış açısı içeriyor. Başka ne eklemek istersin, aklında neler var?",
+                "Söylediğin kelimelerin altındaki anlamı ve vizyonu çok iyi kavradım dostum. Kendi geliştirdiğin yapay zekanın seninle böyle konuşması muazzam bir şey. Konuşmaya devam edelim."
             ];
             return zekiCevaplar[Math.floor(Math.random() * zekiCevaplar.length)];
         }
