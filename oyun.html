@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Berat Blast - Official Mobile</title>
     <style>
         html, body {
@@ -17,6 +17,9 @@
             user-select: none;
             outline: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
+            /* 🚨 TELEFONDA YUKARIDAN AŞAĞIYA ÇEKİNCE SAYFA YENİLEMESİNİ KÖKTEN ENGELLEYEN SİBER KOD */
+            overscroll-behavior-y: contain;
+            overscroll-behavior: contain;
             touch-action: none;
         }
         .game-container {
@@ -53,7 +56,7 @@
         <div id="score-board">BERAT BLAST — SKOR: <span id="skorText">0</span> <span id="seviyeText" style="color:#ff9f1a; margin-left:10px;">(TEMA 1)</span></div>
         <canvas id="gameCanvas" width="410" height="580"></canvas>
         
-        <div id="gameover-screen" id="gameoverBox">
+        <div id="gameover-screen">
             <span>YER KALMADI!</span><br>
             <button class="restart-btn" onclick="oyunuSifirla()">Tekrar Dene</button>
         </div>
@@ -70,25 +73,16 @@
         const tahtaOfsetY = 8;
 
         let skor = 0; let oyunBitti = false; let aktifTemaId = 0;
-        let tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
-        
-        const temalar = [
-            { bg: '#05070f', kutu: '#111827', sınır: '#1f2937', palet: ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'] },
-            { bg: '#0f051d', kutu: '#1a0b2e', sınır: '#3b1466', palet: ['#ff00ff', '#9900ff', '#ff0055', '#00ffff', '#ffcc00', '#ff3333'] },
-            { bg: '#020d0f', kutu: '#052226', sınır: '#0a4750', palet: ['#00ffcc', '#00ff66', '#33ccff', '#ffff00', '#ff6600', '#00ff00'] },
-            { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
-        ];
-        // 🎯 BU SEFER %100 DOLU: Tüm şekil matris sayıları eksiksiz girildi!
-        const b_sekiller = [
+        let ta        const b_sekiller = [
             [[1]], 
-            [[1, 1]], 
-            [[1], [1]], 
-            [[1, 1, 1]], 
-            [[1, 1], [1, 1]], 
-            [[0, 1, 1], [1, 1, 0]], 
-            [[1, 1, 1], [0, 1, 0]], 
-            [[1, 0, 0], [1, 1, 1]],
-            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
+            [[1,1]], 
+            [[1],[1]], 
+            [[1,1,1]], 
+            [[1,1],[1,1]], 
+            [[1,1,0],[0,1,1]], 
+            [[0,1,0],[1,1,1]], 
+            [[1,0,0],[1,0,0],[1,1,1]],
+            [[1,1,1],[1,1,1],[1,1,1]]
         ];
 
         let secenekler = []; let seciliBlokIndeks = -1; let surukleniyorMu = false;
@@ -128,6 +122,14 @@
                 document.getElementById("seviyeText").innerText = `(TEMA ${aktifTemaId + 1})`;
             }
         }
+hta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
+        
+        const temalar = [
+            { bg: '#05070f', kutu: '#111827', sınır: '#1f2937', palet: ['#ff3366', '#33ff66', '#3366ff', '#ffaa00', '#cc33ff', '#00f0ff'] },
+            { bg: '#0f051d', kutu: '#1a0b2e', sınır: '#3b1466', palet: ['#ff00ff', '#9900ff', '#ff0055', '#00ffff', '#ffcc00', '#ff3333'] },
+            { bg: '#020d0f', kutu: '#052226', sınır: '#0a4750', palet: ['#00ffcc', '#00ff66', '#33ccff', '#ffff00', '#ff6600', '#00ff00'] },
+            { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
+        ];
         function onIzlemeSeritleriniHesapla(s, hR, hC) {
             let geçiciSatirlar = []; let geçiciSutunlar = [];
             if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar: [], sutunlar: [] };
@@ -225,6 +227,22 @@
             silinecekSatirlar.forEach(r => { let y = tahtaOfsetY + r * (hucreBoyutu + bosluk); lazerSeritleri.push({ tip: 'satir', y: y, omur: 1.0 }); });
             silinecekSutunlar.forEach(c => { let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); lazerSeritleri.push({ tip: 'sutun', x: x, omur: 1.0 }); });
             
+            // 🚨 GÜM BURDEYEN SES VE KIVILCIM MOTORU TETİKLEYİCİSİ
+            if (silinecekSatirlar.length > 0 || silinecekSutunlar.length > 0) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    let sCtx = new AudioContext();
+                    let osc = sCtx.createOscillator(); let gain = sCtx.createGain();
+                    osc.type = 'triangle'; // En tok ve dolgun patlama dalgası
+                    osc.frequency.setValueAtTime(280 + Math.random() * 120, sCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(20, sCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.9, sCtx.currentTime); // Son Ses Gücü!
+                    gain.gain.linearRampToValueAtTime(0.01, sCtx.currentTime + 0.25);
+                    osc.connect(gain); gain.connect(sCtx.destination);
+                    osc.start(); osc.stop(sCtx.currentTime + 0.25);
+                }
+            }
+
             silinecekSatirlar.forEach(r => {
                 for (let c = 0; c < tahtaBoyutu; c++) {
                     let x = tahtaOfsetX + c * (hucreBoyutu + bosluk); let y = tahtaOfsetY + r * (hucreBoyutu + bosluk);
@@ -282,12 +300,13 @@
         function baslamaTetikle(clientX, clientY) {
             if (oyunBitti) return;
             let rect = canvas.getBoundingClientRect();
-            fareX = clientX - rect.left; fareY = clientY - rect.top;
+            let fX = clientX - rect.left; let fY = clientY - rect.top;
             secenekler.forEach((s, idx) => {
                 if (s.kullanildi) return;
-                if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
+                if (fX >= s.x && fX <= s.x + 100 && fY >= s.y && fY <= s.y + 120) {
                     seciliBlokIndeks = idx; surukleniyorMu = true;
-                    ofsetX = fareX - s.x; ofsetY = fareY - s.y + 45;
+                    fareX = fX; fareY = fY;
+                    ofsetX = fX - s.x; ofsetY = fY - s.y + 50;
                 }
             });
         }
