@@ -14,9 +14,6 @@
             transition: background-color 1s ease;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             outline: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -26,14 +23,13 @@
             position: relative; display: flex; flex-direction: column; align-items: center;
             background: #111827; padding: 12px; border-radius: 20px;
             border: 3px solid #1f2937; box-shadow: 0 15px 50px rgba(0,0,0,0.7);
-            transition: all 1s ease;
             transform: scale(0.95);
         }
         #score-board {
             color: #00f0ff; font-size: 20px; font-weight: bold; margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(0,240,255,0.5);
         }
-        canvas { background-color: #05070f; border-radius: 12px; cursor: pointer; transition: background-color 1s ease; }
+        canvas { background-color: #05070f; border-radius: 12px; cursor: pointer; }
         #gameover-screen {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 7, 15, 0.95); border-radius: 20px;
@@ -43,7 +39,7 @@
         .restart-btn {
             margin-top: 20px; background-color: #16a34a; color: white; border: none;
             padding: 12px 30px; font-size: 18px; font-weight: bold; border-radius: 8px;
-            cursor: pointer; animation: butonNabiz 1s infinite alternate; transition: 0.2s;
+            cursor: pointer; animation: butonNabiz 1s infinite alternate;
         }
         @keyframes butonNabiz {
             0% { transform: scale(1); box-shadow: 0 0 10px rgba(22, 163, 74, 0.6); }
@@ -57,7 +53,7 @@
         <div id="score-board">BERAT BLAST — SKOR: <span id="skorText">0</span> <span id="seviyeText" style="color:#ff9f1a; margin-left:10px;">(TEMA 1)</span></div>
         <canvas id="gameCanvas" width="410" height="580"></canvas>
         
-        <div id="gameover-screen">
+        <div id="gameover-screen" id="gameoverBox">
             <span>YER KALMADI!</span><br>
             <button class="restart-btn" onclick="oyunuSifirla()">Tekrar Dene</button>
         </div>
@@ -82,23 +78,22 @@
             { bg: '#020d0f', kutu: '#052226', sınır: '#0a4750', palet: ['#00ffcc', '#00ff66', '#33ccff', '#ffff00', '#ff6600', '#00ff00'] },
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
-
-        // 🎯 MATRİSLER %100 GERÇEK SAYILARLA DOLDURULDU!
+        // 🎯 BU SEFER %100 DOLU: Tüm şekil matris sayıları eksiksiz girildi!
         const b_sekiller = [
             [[1]], 
             [[1, 1]], 
             [[1], [1]], 
             [[1, 1, 1]], 
             [[1, 1], [1, 1]], 
-            [[1, 1, 0], [0, 1, 1]], 
-            [[0, 1, 0], [1, 1, 1]], 
-            [[1, 0], [1, 0], [1, 1]],
+            [[0, 1, 1], [1, 1, 0]], 
+            [[1, 1, 1], [0, 1, 0]], 
+            [[1, 0, 0], [1, 1, 1]],
             [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
         ];
 
-        let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
+        let secenekler = []; let seciliBlokIndeks = -1; let surukleniyorMu = false;
         let fareX = 0; let fareY = 0; let ofsetX = 0; let ofsetY = 0;
-        let parcaciklar =; let izParcaciklari =; let lazerSeritleri =; 
+        let parcaciklar = []; let izParcaciklari = []; let lazerSeritleri = []; 
 
         function parcalanmaEfektiYarat(x, y, renk) {
             for (let i = 0; i < 18; i++) {
@@ -111,7 +106,7 @@
         }
 
         function yeniParcalariUret() {
-            secenekler =; let p = temalar[aktifTemaId].palet;
+            secenekler = []; let p = temalar[aktifTemaId].palet;
             for (let i = 0; i < 3; i++) {
                 let rastgeleTip = Math.floor(Math.random() * b_sekiller.length);
                 let rastgeleRenk = p[Math.floor(Math.random() * p.length)];
@@ -122,6 +117,7 @@
             }
             hamleKontrolEt();
         }
+
         function temaEvrimKontrolEt() {
             let yeniTemaId = Math.min(temalar.length - 1, Math.floor(skor / 1000));
             if (yeniTemaId !== aktifTemaId) {
@@ -132,10 +128,9 @@
                 document.getElementById("seviyeText").innerText = `(TEMA ${aktifTemaId + 1})`;
             }
         }
-
         function onIzlemeSeritleriniHesapla(s, hR, hC) {
-            let geçiciSatirlar =; let geçiciSutunlar =;
-            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar:, sutunlar: };
+            let geçiciSatirlar = []; let geçiciSutunlar = [];
+            if (!tahtayaYerlesebilirMi(s, hR, hC)) return { satirlar: [], sutunlar: [] };
             let sanalTahta = tahta.map(row => [...row]);
             for (let r = 0; r < s.matris.length; r++) {
                 for (let c = 0; c < s.matris[r].length; c++) {
@@ -220,7 +215,7 @@
             ctx.globalAlpha = 1.0;
         }
         function patlamaKontrolEt() {
-            let silinecekSatirlar =; let silinecekSutunlar =;
+            let silinecekSatirlar = []; let silinecekSutunlar = [];
             for (let r = 0; r < tahtaBoyutu; r++) { if (tahta[r].every(kare => kare !== 0)) silinecekSatirlar.push(r); }
             for (let c = 0; c < tahtaBoyutu; c++) {
                 let sutunDolu = true;
@@ -279,7 +274,7 @@
         function oyunuSifirla() {
             tahta = Array(tahtaBoyutu).fill().map(() => Array(tahtaBoyutu).fill(0));
             skor = 0; document.getElementById('skorText').innerText = skor; oyunBitti = false;
-            parcaciklar =; izParcaciklari =; lazerSeritleri =;
+            parcaciklar = []; izParcaciklari = []; lazerSeritleri = [];
             document.getElementById("gameover-screen").style.display = "none";
             temaEvrimKontrolEt(); yeniParcalariUret(); ekranCiz();
         }
@@ -326,16 +321,14 @@
         canvas.addEventListener('mouseup', bitisTetikle);
 
         canvas.addEventListener('touchstart', (e) => {
-            let touch = e.touches; baslamaTetikle(touch.clientX, touch.clientY);
+            let touch = e.touches[0]; baslamaTetikle(touch.clientX, touch.clientY);
         }, { passive: true });
 
         canvas.addEventListener('touchmove', (e) => {
-            let touch = e.touches; hareketTetikle(touch.clientX, touch.clientY);
+            let touch = e.touches[0]; hareketTetikle(touch.clientX, touch.clientY);
         }, { passive: true });
 
-        canvas.addEventListener('touchend', (e) => {
-            bitisTetikle();
-        }, { passive: true });
+        canvas.addEventListener('touchend', bitisTetikle);
 
         function oyunDongusu() { ekranCiz(); requestAnimationFrame(oyunDongusu); }
         yeniParcalariUret(); oyunDongusu();
