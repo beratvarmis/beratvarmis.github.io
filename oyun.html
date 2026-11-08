@@ -12,7 +12,6 @@
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             transition: background-color 1s ease;
-            /* 🚨 MAVİ EKRAN SEÇME SEÇENEĞİNİ KÖKTEN KİLİTLEYEN MOBİL KODLAR */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -84,16 +83,17 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
+        // 🎯 MATRİSLER %100 GERÇEK SAYILARLA DOLDURULDU!
         const b_sekiller = [
-            [], 
-            [], 
-            [,], 
-            [], 
-            [,], 
-            [,], 
-            [,], 
-            [,,],
-            [,,]
+            [[1]], 
+            [[1, 1]], 
+            [[1], [1]], 
+            [[1, 1, 1]], 
+            [[1, 1], [1, 1]], 
+            [[1, 1, 0], [0, 1, 1]], 
+            [[0, 1, 0], [1, 1, 1]], 
+            [[1, 0], [1, 0], [1, 1]],
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
         ];
 
         let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
@@ -292,7 +292,7 @@
                 if (s.kullanildi) return;
                 if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
                     seciliBlokIndeks = idx; surukleniyorMu = true;
-                    ofsetX = fareX - s.x; ofsetY = fareY - s.y + 45; // Parmağın tam üstünde kayar
+                    ofsetX = fareX - s.x; ofsetY = fareY - s.y + 45;
                 }
             });
         }
@@ -321,27 +321,23 @@
             surukleniyorMu = false; seciliBlokIndeks = -1;
         }
 
-        // PC Fare Kontrolleri
         canvas.addEventListener('mousedown', (e) => baslamaTetikle(e.clientX, e.clientY));
         canvas.addEventListener('mousemove', (e) => hareketTetikle(e.clientX, e.clientY));
         canvas.addEventListener('mouseup', bitisTetikle);
 
-        // 📱 Mobil Parmak Hassas Kontrolleri (Mavi seçme bandını tarihe gömen emniyet sistemi)
         canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Sayfanın kaymasını engelle
-            let t = e.touches[0]; baslamaTetikle(t.clientX, t.clientY);
-        }, { passive: false });
+            let touch = e.touches; baslamaTetikle(touch.clientX, touch.clientY);
+        }, { passive: true });
 
         canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            let t = e.touches[0]; hareketTetikle(t.clientX, t.clientY);
-        }, { passive: false });
+            let touch = e.touches; hareketTetikle(touch.clientX, touch.clientY);
+        }, { passive: true });
 
         canvas.addEventListener('touchend', (e) => {
-            e.preventDefault(); bitisTetikle();
-        }, { passive: false });
+            bitisTetikle();
+        }, { passive: true });
 
-        function oyunDongusu() { if (!surukleniyorMu) ekranCiz(); requestAnimationFrame(oyunDongusu); }
+        function oyunDongusu() { ekranCiz(); requestAnimationFrame(oyunDongusu); }
         yeniParcalariUret(); oyunDongusu();
     </script>
 </body>
