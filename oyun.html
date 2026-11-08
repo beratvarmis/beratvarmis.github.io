@@ -12,7 +12,15 @@
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             transition: background-color 1s ease;
-            user-select: none; -webkit-user-select: none;
+            /* 🚨 MAVİ EKRAN SEÇME SEÇENEĞİNİ KÖKTEN KİLİTLEYEN MOBİL KODLAR */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
             touch-action: none;
         }
         .game-container {
@@ -76,17 +84,16 @@
             { bg: '#0f0f0f', kutu: '#1f1f1f', sınır: '#3a3a3a', palet: ['#ffffff', '#ff3333', '#33ff33', '#3333ff', '#ffff33', '#ff33ff'] }
         ];
 
-        // 🎯 ARTIK ASLA SİYAH KALMAZ: Tüm Tetris ve 3x3 kalıpları 1 ve 0'larla eksiksiz dolduruldu!
         const b_sekiller = [
-            [[1]], 
-            [[1,1]], 
-            [[1],[1]], 
-            [[1,1,1]], 
-            [[1,1],[1,1]], 
-            [[1,1,0],[0,1,1]], 
-            [[0,1,0],[1,1,1]], 
-            [[1,0,0],[1,0,0],[1,1,1]],
-            [[1,1,1],[1,1,1],[1,1,1]]
+            [], 
+            [], 
+            [,], 
+            [], 
+            [,], 
+            [,], 
+            [,], 
+            [,,],
+            [,,]
         ];
 
         let secenekler =; let seciliBlokIndeks = -1; let surukleniyorMu = false;
@@ -285,15 +292,15 @@
                 if (s.kullanildi) return;
                 if (fareX >= s.x && fareX <= s.x + 100 && fareY >= s.y && fareY <= s.y + 120) {
                     seciliBlokIndeks = idx; surukleniyorMu = true;
-                    ofsetX = fareX - s.x; ofsetY = fareY - s.y + 40;
+                    ofsetX = fareX - s.x; ofsetY = fareY - s.y + 45; // Parmağın tam üstünde kayar
                 }
             });
         }
 
         function hareketTetikle(clientX, clientY) {
+            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
             let rect = canvas.getBoundingClientRect();
             fareX = clientX - rect.left; fareY = clientY - rect.top;
-            if (!surukleniyorMu || seciliBlokIndeks === -1) return;
             secenekler[seciliBlokIndeks].x = fareX - ofsetX;
             secenekler[seciliBlokIndeks].y = fareY - ofsetY;
         }
@@ -314,13 +321,25 @@
             surukleniyorMu = false; seciliBlokIndeks = -1;
         }
 
+        // PC Fare Kontrolleri
         canvas.addEventListener('mousedown', (e) => baslamaTetikle(e.clientX, e.clientY));
         canvas.addEventListener('mousemove', (e) => hareketTetikle(e.clientX, e.clientY));
         canvas.addEventListener('mouseup', bitisTetikle);
 
-        canvas.addEventListener('touchstart', (e) => { let t = e.touches[0]; baslamaTetikle(t.clientX, t.clientY); });
-        canvas.addEventListener('touchmove', (e) => { let t = e.touches[0]; hareketTetikle(t.clientX, t.clientY); });
-        canvas.addEventListener('touchend', bitisTetikle);
+        // 📱 Mobil Parmak Hassas Kontrolleri (Mavi seçme bandını tarihe gömen emniyet sistemi)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Sayfanın kaymasını engelle
+            let t = e.touches[0]; baslamaTetikle(t.clientX, t.clientY);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            let t = e.touches[0]; hareketTetikle(t.clientX, t.clientY);
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault(); bitisTetikle();
+        }, { passive: false });
 
         function oyunDongusu() { if (!surukleniyorMu) ekranCiz(); requestAnimationFrame(oyunDongusu); }
         yeniParcalariUret(); oyunDongusu();
